@@ -1,0 +1,32 @@
+# Local Postgres and Redis so the repository runs with no cloud account.
+#   docker compose up -d
+#   DATABASE_URL=postgresql+psycopg://asuntohaku:asuntohaku@localhost:5432/asuntohaku alembic upgrade head
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: asuntohaku
+      POSTGRES_PASSWORD: asuntohaku
+      POSTGRES_DB: asuntohaku
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asuntohaku"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

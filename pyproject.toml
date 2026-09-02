@@ -1,0 +1,42 @@
+[project]
+name = "asuntohaku-gate"
+version = "0.1.0"
+description = "Housing search and application demo with an explainable eligibility rule engine"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "sqlalchemy>=2.0",
+    "pydantic>=2",
+    "alembic",
+    "psycopg[binary]",
+    "redis",
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "httpx", "ruff", "mypy"]
+
+[tool.setuptools]
+packages = ["api", "api.app", "api.rules", "api.texts", "seeds"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "db: requires a live PostgreSQL database (set DATABASE_URL)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["api", "seeds"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+ignore_errors = true
