@@ -78,3 +78,74 @@ def test_the_stock_can_exercise_the_size_rule() -> None:
     """Scenario 7 needs a studio to reject a five-person household with."""
     assert any(u.rooms == 1 for u in RENTAL)
     assert any(u.rooms >= 4 for u in RENTAL)
+
+
+# -- listing content (seeds/listings.py) -----------------------------------
+# Section 8 makes this content a real requirement rather than a placeholder
+# task: a search page laid out against thin data looks broken however good the
+# code is. These tests hold the content to the bar the spec sets.
+
+from seeds.listings import PROPERTY_CONTACTS, PROPERTY_COORDINATES, UNIT_LISTINGS  # noqa: E402
+
+UNIT_KEYS = {(p.name, u.unit_number) for p in PROPERTIES for u in p.units}
+UNITS_BY_KEY = {(p.name, u.unit_number): u for p in PROPERTIES for u in p.units}
+
+
+def test_every_unit_has_listing_content() -> None:
+    assert set(UNIT_LISTINGS) == UNIT_KEYS
+    assert set(PROPERTY_CONTACTS) == {p.name for p in PROPERTIES}
+    assert set(PROPERTY_COORDINATES) == {p.name for p in PROPERTIES}
+
+
+def test_every_unit_has_photographs_and_exactly_one_floor_plan() -> None:
+    for key, listing in UNIT_LISTINGS.items():
+        assert len(listing.images) >= 3, key
+        plans = [i for i in listing.images if i.kind == "pohjapiirros"]
+        assert len(plans) == 1, key
+        assert len({i.url for i in listing.images}) == len(listing.images), key
+        assert len({i.sort_order for i in listing.images}) == len(listing.images), key
+
+
+def test_every_image_is_attributed() -> None:
+    """Stock photos under a licence: the credit has to survive into the database."""
+    for key, listing in UNIT_LISTINGS.items():
+        for image in listing.images:
+            assert image.credit.strip(), key
+            assert image.alt_fi.strip(), key
+            assert image.url.startswith("https://"), key
+
+
+def test_descriptions_are_substantial_and_distinct() -> None:
+    descriptions = [listing.description_fi for listing in UNIT_LISTINGS.values()]
+
+    assert len(set(descriptions)) == len(descriptions)
+    for text in descriptions:
+        assert text.count(".") >= 4, text[:60]
+        assert len(text) >= 300
+        assert "lorem" not in text.lower()
+
+
+def test_room_layout_matches_the_room_count() -> None:
+    """`2h + kk + s` has to agree with the `rooms` column, or the row lies."""
+    for key, listing in UNIT_LISTINGS.items():
+        assert listing.room_layout_fi.startswith(f"{UNITS_BY_KEY[key].rooms}h"), key
+
+
+def test_maintenance_fee_is_a_sale_only_fact() -> None:
+    """Matches the ck_units_maintenance_fee constraint, checked before the database."""
+    for key, listing in UNIT_LISTINGS.items():
+        is_sale = UNITS_BY_KEY[key].listing_type == "myynti"
+        assert (listing.maintenance_fee_eur is not None) is is_sale, key
+
+
+def test_coordinates_are_distinct_so_map_pins_do_not_stack() -> None:
+    points = {(c.lat, c.lng) for c in PROPERTY_COORDINATES.values()}
+
+    assert len(points) == len(PROPERTY_COORDINATES)
+
+
+def test_every_property_has_a_named_contact_with_a_photo() -> None:
+    for name, contact in PROPERTY_CONTACTS.items():
+        assert contact.name.strip() and contact.title_fi.strip(), name
+        assert contact.email.endswith("asuntohaku-demo.fi"), name
+        assert contact.photo_url, name
