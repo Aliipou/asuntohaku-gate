@@ -196,8 +196,9 @@ class ApplicationUnit(Base):
 class Decision(Base):
     __tablename__ = "decisions"
     __table_args__ = (
-        # The section 2.1 invariant, held in the schema as well as in the Outcome
-        # type: no stored decision without a rule, a message and evidence.
+        # The section 2.1 invariant, held in the schema as well as in the
+        # Outcome dataclass: no stored decision without a rule, a message and
+        # evidence.
         CheckConstraint("length(rule_id) > 0", name="ck_decisions_rule_id"),
         CheckConstraint("length(message_fi) > 0", name="ck_decisions_message"),
         CheckConstraint("evidence_json <> '{}'::jsonb", name="ck_decisions_evidence"),

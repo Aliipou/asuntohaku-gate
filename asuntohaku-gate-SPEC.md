@@ -151,10 +151,9 @@ generated documentation:
     requires=["household_income"],
     title_fi="Ruokakunnan tulot enintään tulorajan suuruiset",
 )
-def income_within_limit(snapshot: ApplicationSnapshot,
-                        unit: UnitSnapshot,
-                        limits: Limits) -> Outcome:
-    ...
+def income_within_limit(
+    snapshot: ApplicationSnapshot, unit: UnitSnapshot, limits: Limits
+) -> Outcome: ...
 ```
 
 `requires` is what makes the form adaptive: the frontend asks the API which
