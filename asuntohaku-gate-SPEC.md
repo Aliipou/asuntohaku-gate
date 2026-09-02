@@ -79,6 +79,8 @@ Chosen to match the target employer's stack, not for convenience.
   one Playwright path covering search → basket → application → decisions.
 - **Local:** docker-compose with Postgres and Redis so the repo runs without
   any cloud account.
+- **Map:** MapLibre GL JS against a free tile source. This is the only mapping
+  dependency; do not hand-roll a canvas map.
 
 Do not add: authentication providers, ORM alternatives, state management
 libraries, component libraries, or an LLM. None of them serve this brief.
@@ -95,9 +97,22 @@ properties          id, name, street, postal_code, city, housing_form,
 
 units               id, property_id, unit_number, rooms, floor, area_m2,
                     listing_type ('vuokra' | 'myynti'),
-                    rent_eur | price_eur, deposit_eur,
+                    rent_eur | price_eur, deposit_eur, maintenance_fee_eur,
                     availability ('vapaa' | 'vapautuu' | 'sopimuksella'),
-                    available_from, description_fi, description_en
+                    available_from, description_fi, description_en,
+                    room_layout_fi ('2h + kk + s'), dwelling_type
+                    ('kerrostalo' | 'rivitalo' | 'omakotitalo' | 'luhtitalo'),
+                    has_lift, has_sauna, has_balcony, pets_allowed,
+                    accessible
+
+unit_images         id, unit_id, url, kind ('valokuva' | 'pohjapiirros'),
+                    alt_fi, credit, sort_order
+
+contacts            id, property_id, name, title_fi, email, phone, photo_url
+
+favourites          id, session_key, unit_id, created_at
+
+saved_searches      id, session_key, name, query_json, created_at
 
 applications        id, edit_token (uuid, unguessable), status,
                     created_at, expires_at (created_at + 3 months),
@@ -134,6 +149,11 @@ Constraints that must exist in the schema, not only in application code:
   `price_eur` non-null exactly when `listing_type = 'myynti'`. Use a check
   constraint.
 - Deleting an application cascades to its members, need, units and decisions.
+- Deleting a unit cascades to its images and favourites.
+- `unit_images` is unique on `(unit_id, sort_order)`, and every unit has at
+  least one image row.
+- `favourites` is unique on `(session_key, unit_id)`. There is no login, so a
+  favourite belongs to an opaque browser-held key, not to a user.
 
 ---
 
@@ -249,7 +269,24 @@ POST /api/viewings/{id}/bookings
 POST /api/units/{id}/offers         sale units only
 GET  /api/admin/units/{id}/applicants
                                     ranked list with the ranking basis shown
+
+GET  /api/units/{id}/similar        Vastaavia asuntoja: same city, comparable
+                                    size and price
+GET  /api/cities                    autocomplete source for the search bar
+GET  /api/favourites                by session key
+POST /api/favourites                add
+DELETE /api/favourites/{unit_id}    remove
+GET  /api/saved-searches            by session key
+POST /api/saved-searches            store a named filter state
 ```
+
+Search accepts the sort order the UI offers (`uusimmat`, `halvin`, `kallein`,
+`suurin`) and returns the result count separately from the page, because the
+UI shows the count above the list.
+
+The session key for favourites and saved searches is an opaque value the
+browser generates and sends. It is not a login and grants no access to
+anything but that browser's own list.
 
 No login. The admin view is at an unlinked path and the README says plainly
 that access control is out of scope for the demo. Do not fake a login screen.
@@ -261,16 +298,57 @@ that access control is out of scope for the demo. Do not fake a login screen.
 Finnish first. English is a secondary locale for the search and detail pages
 only — do not half-translate the application flow.
 
-1. **Asuntohaku** — the landing page *is* the search with results already
-   present. No marketing hero. Filters: city, housing form, rooms, price
-   range, listing type, availability. Both rental and sale stock in one index,
-   distinguished by a structural difference in the result row, not by a badge
-   colour alone.
+**The governing rule for screens 1 and 2: copy the pattern, not the identity.**
 
-2. **Asunnon sivu** — apartment detail, availability, deposit or price, and a
-   line stating which housing form it belongs to and in one sentence what that
-   means for the applicant. Primary action: *Lisää hakemukseen*. For sale
-   units: *Varaa näyttöaika* and *Jätä tarjous*.
+Someone working at a Finnish housing operator sees Oikotie, Etuovi and
+Vuokraovi every day. If the search page does not behave like those, they will
+not read it as a design choice, they will read it as unfinished. So screens 1
+and 2 follow the conventions of the category closely: layout, component
+vocabulary, information hierarchy and Finnish label wording are all taken from
+what the category has settled on.
+
+What is not taken: no logo, brand colour, photograph or copy from any real
+site. In particular, do not attempt a pixel imitation of avainasunnot.fi — a
+half-finished copy of their own site reads worse than a clean neutral one.
+
+Original design effort goes into screens 3, 4 and 5 instead, which is where
+this project has something of its own to say.
+
+1. **Asuntohaku** — the landing page *is* the search, with results already
+   present. No marketing hero.
+
+   - Search bar with location autocomplete, and a segmented control for
+     *Vuokrattavat* / *Myytävät*.
+   - Horizontal filter bar of chips — city, rooms, price range, housing form,
+     availability — plus *Lisää hakuehtoja* for the rest.
+   - **Filter state is encoded in the URL.** A filtered search is a link that
+     can be shared, bookmarked and reloaded.
+   - Result count and a sort dropdown (`Uusimmat`, `Halvin ensin`,
+     `Kallein ensin`, `Suurin pinta-ala`).
+   - Split view: result list beside a map with price pins. The two are linked —
+     hovering a row highlights its pin.
+   - Result cards carry a photo, the price in large type, and one dense
+     metadata line: `2h + kk + s · 54,5 m² · 3. krs`. A favourite (heart)
+     control, and *Tallenna haku*.
+   - Rental and sale stock are distinguished structurally, not by badge colour
+     alone: a rental row shows rent and deposit, a sale row shows price and
+     maintenance fee.
+
+2. **Asunnon sivu** — the listing page, also to category convention.
+
+   - Image gallery, including the `pohjapiirros` (floor plan) as one of the
+     image types.
+   - Dense key-facts table using the standard Finnish labels: `Sijainti`,
+     `Huoneistoselitelmä`, `Pinta-ala`, `Kerros`, `Vuokra` / `Velaton hinta`,
+     `Hoitovastike`, `Vakuus`, `Vapautuu`, `Rakennusvuosi`, `Hissi`, `Sauna`,
+     `Parveke`, `Lemmikit`, `Esteetön`.
+   - Map, sticky action panel with a named contact person and their photo, and
+     *Vastaavia asuntoja* at the foot of the page.
+   - Primary action: *Lisää hakemukseen*. For sale units: *Varaa näyttöaika*
+     and *Jätä tarjous*.
+   - **One line, and only one:** under the housing-form row, a single sentence
+     saying what this housing form asks of the applicant, linking to the
+     application. The listing page must not turn into a lesson in housing law.
 
 3. **Hakemus** — the basket and the adaptive form. When a section appears, the
    interface says which chosen apartment requires it. Progress is expressed as
@@ -287,20 +365,21 @@ only — do not half-translate the application flow.
 
 ### Design direction
 
-The audience is people looking for a home, often under time pressure and
-sometimes on a low income, reading regulated terms they did not choose to
-learn. The design job is legibility and calm, not persuasion.
+Screens 1 and 2 inherit their direction from the category. The rules below
+govern screens 3, 4 and 5, and settle anything the category does not.
 
-- Do not use: a warm cream background with a serif display and a clay accent;
-  identical rounded cards for every content type; all-caps eyebrow labels;
-  arrows appended to button text; a percentage progress bar.
+- The audience is people looking for a home, often under time pressure and
+  sometimes on a low income, reading regulated terms they did not choose to
+  learn. For the application and decision screens the design job is legibility
+  and calm, not persuasion.
+- Do not use: all-caps eyebrow labels; arrows appended to button text; a
+  percentage progress bar.
 - Base palette: an off-white paper ground, a dark slate ink, and one cool
   structural blue for interactive elements. The three outcome states need three
   distinguishable treatments that survive greyscale and colour-blindness — use
   shape and label, with colour as reinforcement only.
 - One sans family with proper Finnish diacritics, set at a generous size for
-  body text. Numbers in the search results are data, so tabular figures.
-- Result rows are rows, not cards. The list is something people scan.
+  body text. Numbers are data, so tabular figures throughout.
 - Motion: one place only, the moment a section appears or disappears in the
   application form because the basket changed. Everything else is static.
 - Quality floor without announcing it: responsive to mobile, visible keyboard
@@ -309,13 +388,39 @@ learn. The design job is legibility and calm, not persuasion.
 Copy: active voice, sentence case, no apology in error states. Say what is
 missing and where to fix it.
 
----
+### Map
+
+Use MapLibre GL JS with a free raster or vector tile source. Do not build a
+custom canvas map. The map is not where this project's time is spent.
+
 
 ## 8. Seed data
+
+**This is not a placeholder task, and it comes before the search UI.** A search
+page laid out against thin data looks broken no matter how good the code is,
+and that is where most demos die. Build the content first and lay out against
+it.
 
 Eight properties across Helsinki, Espoo, Vantaa and Tampere, covering all four
 housing forms. Around forty rental units and eight sale units. Availability
 mixed across `vapaa`, `vapautuu` and `sopimuksella`.
+
+Requirements on the content, not just the row count:
+
+- **At least three real photographs per unit**, from Unsplash or Pexels under a
+  licence that permits this use. Store the source and photographer in
+  `unit_images.credit` and honour the licence's attribution terms. One of the
+  images per unit is a `pohjapiirros`.
+- **Multi-sentence Finnish descriptions**, written per apartment. No generated
+  filler, no repeated sentences, no Lorem.
+- **Real coordinates**, distinct per property and correct for the street named,
+  so the map does not stack every pin on one point.
+- **Prices appropriate to the area.** A Helsinki two-room flat and a Tampere
+  two-room flat must not carry the same rent, and regulated stock must be
+  visibly cheaper than free-financed stock in the same city.
+- A named contact person per property, with a photograph, for the listing
+  page's action panel.
+- `room_layout_fi` written the way the category writes it: `2h + kk + s`.
 
 Then eight named demo scenarios, each a preloaded application reachable by a
 link from the README, chosen so that each one lands on a different rule:
@@ -338,7 +443,6 @@ link from the README, chosen so that each one lands on a different rule:
 Every threshold used by these scenarios comes from `seeds/limits.py`, with a
 comment at the top of the file stating the figures are invented for the demo.
 
----
 
 ## 9. Tests
 
@@ -383,6 +487,12 @@ own section and without hedging:
   of scope.
 - There is no identification, no document upload, and no integration with any
   housing register or external system.
+- The listing photographs are stock images under their own licences, credited
+  in the repository. They are not photographs of the apartments described, and
+  the apartments do not exist.
+- The search and listing pages deliberately follow the conventions of Finnish
+  property portals. No brand identity, logo, photograph or copy is taken from
+  any real site.
 - What the project is actually demonstrating: an adaptive application form
   driven by a documented rule catalogue, and decisions that always carry their
   rule and their evidence.
@@ -400,6 +510,8 @@ Do not build the frontend first.
 2. Rule engine with the full test table. Nothing else until this is green.
 3. Rule catalogue generator and its drift check.
 4. API, contract tests.
+4b. Listing content: images, contacts, coordinates, descriptions. Before any
+   search UI is laid out.
 5. Search and detail pages.
 6. Application flow and the adaptive-field endpoint.
 7. Decisions screen. Spend the design time here.
