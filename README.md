@@ -28,6 +28,19 @@ explain every decision to the applicant in Finnish.
 - **Generated rule catalogue** — [`docs/saannot.md`](docs/saannot.md), rendered from
   rule metadata. CI fails if the committed copy has drifted.
 
+### Seeing it work
+
+The eight demo scenarios from the specification run against the rule engine
+without a database or a frontend:
+
+```bash
+python -m seeds.scenarios
+```
+
+Each one prints the fields the application form asks for, which chosen apartment
+caused each field to appear, and every apartment's decision in Finnish with the
+rule that produced it and the values that decided it.
+
 ### Three outcomes, and every one of them explained
 
 An eligibility outcome is `kelpoinen`, `puuttuvat_tiedot` or `ei_kelpoinen`, and it
