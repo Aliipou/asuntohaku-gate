@@ -7,7 +7,7 @@ import hashlib
 import json
 from collections.abc import Mapping
 from decimal import Decimal
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
@@ -15,11 +15,14 @@ from sqlalchemy.orm import Session, selectinload
 
 from api.app import cache
 from api.app.db import get_session
-from api.app.models import Offer, Property, Unit, Viewing, ViewingBooking
+from api.app.models import Contact, Offer, Property, Unit, Viewing, ViewingBooking
 from api.app.schemas import (
+    ContactOut,
     OfferIn,
     OfferOut,
+    SortOrder,
     UnitDetailOut,
+    UnitImageOut,
     UnitOut,
     UnitSearchOut,
     ViewingOut,
@@ -32,7 +35,7 @@ router = APIRouter(prefix="/api/units", tags=["units"])
 SessionDep = Annotated[Session, Depends(get_session)]
 
 
-def _to_out(unit: Unit) -> UnitOut:
+def unit_to_out(unit: Unit) -> UnitOut:
     return UnitOut(
         id=unit.id,
         label=unit_label(unit),
@@ -53,7 +56,26 @@ def _to_out(unit: Unit) -> UnitOut:
         deposit_eur=unit.deposit_eur,
         availability=unit.availability,  # type: ignore[arg-type]
         available_from=unit.available_from,
+        maintenance_fee_eur=unit.maintenance_fee_eur,
+        room_layout_fi=unit.room_layout_fi,
+        dwelling_type=unit.dwelling_type,  # type: ignore[arg-type]
+        has_lift=unit.has_lift,
+        has_sauna=unit.has_sauna,
+        has_balcony=unit.has_balcony,
+        pets_allowed=unit.pets_allowed,
+        accessible=unit.accessible,
+        lat=unit.property.lat,
+        lng=unit.property.lng,
+        primary_image=_primary_image(unit),
     )
+
+
+def _primary_image(unit: Unit) -> UnitImageOut | None:
+    """The first photograph. A floor plan is not what a result row should lead with."""
+    photos = [i for i in unit.images if i.kind == "valokuva"] or list(unit.images)
+    if not photos:
+        return None
+    return UnitImageOut.model_validate(min(photos, key=lambda i: i.sort_order))
 
 
 def _cache_key(params: Mapping[str, object]) -> str:
@@ -77,6 +99,7 @@ def search_units(
     rent_max: Annotated[Decimal | None, Query(ge=0)] = None,
     price_min: Annotated[Decimal | None, Query(ge=0)] = None,
     price_max: Annotated[Decimal | None, Query(ge=0)] = None,
+    sort: SortOrder = "uusimmat",
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> UnitSearchOut:
@@ -92,6 +115,7 @@ def search_units(
         "rent_max": rent_max,
         "price_min": price_min,
         "price_max": price_max,
+        "sort": sort,
         "limit": limit,
         "offset": offset,
     }
@@ -100,7 +124,11 @@ def search_units(
     if cached is not None:
         return UnitSearchOut(**cached, cached=True)
 
-    query = select(Unit).join(Unit.property).options(selectinload(Unit.property))
+    query = (
+        select(Unit)
+        .join(Unit.property)
+        .options(selectinload(Unit.property), selectinload(Unit.images))
+    )
     if city:
         query = query.where(Property.city == city)
     if housing_form:
@@ -123,18 +151,40 @@ def search_units(
         query = query.where(Unit.price_eur <= price_max)
 
     total = session.scalar(select(func.count()).select_from(query.subquery())) or 0
-    units = session.scalars(
-        query.order_by(Property.city, Property.street, Unit.unit_number).limit(limit).offset(offset)
-    ).all()
+    units = session.scalars(query.order_by(*_ordering(sort)).limit(limit).offset(offset)).all()
 
-    result = UnitSearchOut(total=total, units=[_to_out(u) for u in units])
+    result = UnitSearchOut(total=total, units=[unit_to_out(u) for u in units])
     cache.set_json(key, result.model_dump(mode="json", exclude={"cached"}))
     return result
 
 
+#: One apartment has either a rent or a price, never both, so "cheapest" has to
+#: compare across the two rather than sorting a column that is null half the time.
+def _price_expression() -> Any:
+    return func.coalesce(Unit.rent_eur, Unit.price_eur)
+
+
+def _ordering(sort: SortOrder) -> tuple[Any, ...]:
+    """SQL ordering for the sort the UI offers.
+
+    `uusimmat` falls back to insertion order: units carry no publication date,
+    and inventing one in the ORDER BY would be a claim the data does not make.
+    """
+    tiebreak = (Property.city, Property.street, Unit.unit_number)
+    if sort == "halvin":
+        return (_price_expression().asc(), *tiebreak)
+    if sort == "kallein":
+        return (_price_expression().desc(), *tiebreak)
+    if sort == "suurin":
+        return (Unit.area_m2.desc(), *tiebreak)
+    return (Unit.id.desc(),)
+
+
 def _get_unit(session: Session, unit_id: int) -> Unit:
     unit = session.scalars(
-        select(Unit).where(Unit.id == unit_id).options(selectinload(Unit.property))
+        select(Unit)
+        .where(Unit.id == unit_id)
+        .options(selectinload(Unit.property), selectinload(Unit.images))
     ).one_or_none()
     if unit is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=fi.unit_not_found())
@@ -144,12 +194,18 @@ def _get_unit(session: Session, unit_id: int) -> Unit:
 @router.get("/{unit_id}", response_model=UnitDetailOut)
 def get_unit(unit_id: int, session: SessionDep) -> UnitDetailOut:
     unit = _get_unit(session, unit_id)
-    base = _to_out(unit)
+    base = unit_to_out(unit)
+    contact = session.scalars(
+        select(Contact).where(Contact.property_id == unit.property_id).order_by(Contact.id).limit(1)
+    ).one_or_none()
     return UnitDetailOut(
-        **base.model_dump(),
+        **base.model_dump(exclude={"primary_image"}),
+        primary_image=base.primary_image,
         housing_form_explanation_fi=fi.HOUSING_FORM_EXPLANATIONS[unit.property.housing_form],
         description_fi=unit.description_fi,
         description_en=unit.description_en,
+        images=[UnitImageOut.model_validate(i) for i in unit.images],
+        contact=ContactOut.model_validate(contact) if contact else None,
     )
 
 

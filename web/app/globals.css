@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/*
+ * Base palette per asuntohaku-gate-SPEC.md section 7: an off-white paper
+ * ground, a dark slate ink, and one cool structural blue reserved for
+ * interactive elements. No dark-mode variant — the brief does not ask for
+ * one, and Finnish property portals (the convention screens 1 and 2 follow)
+ * don't ship one either.
+ */
+:root {
+  --color-paper: #faf8f3;
+  --color-paper-raised: #ffffff;
+  --color-ink: #1c2333;
+  --color-ink-muted: #545b6d;
+  --color-line: #ddd7c9;
+  --color-accent: #2955c4;
+  --color-accent-ink: #ffffff;
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-paper-raised: var(--color-paper-raised);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-line: var(--color-line);
+  --color-accent: var(--color-accent);
+  --color-accent-ink: var(--color-accent-ink);
+  --font-sans: var(--font-geist-sans);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  font-size: 1.0625rem; /* generous body size for regulated, unfamiliar terms */
+  line-height: 1.55;
+  font-feature-settings: "tnum" 1; /* tabular figures by default wherever numbers appear */
+}
+
+/* Visible keyboard focus everywhere, in the structural accent colour. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -27,6 +27,9 @@ ListingType = Literal["vuokra", "myynti"]
 Availability = Literal["vapaa", "vapautuu", "sopimuksella"]
 MemberRole = Literal["paahakija", "toinen", "muu"]
 NeedSituation = Literal["asunnoton", "irtisanottu", "ahtaasti", "ei_tarvetta"]
+DwellingType = Literal["kerrostalo", "rivitalo", "omakotitalo", "luhtitalo"]
+ImageKind = Literal["valokuva", "pohjapiirros"]
+SortOrder = Literal["uusimmat", "halvin", "kallein", "suurin"]
 
 
 def jsonable(value: Any) -> Any:
@@ -97,6 +100,34 @@ class RequiredFieldOut(BaseModel):
     required_by: list[FieldCauseOut]
 
 
+class UnitImageOut(BaseModel):
+    """A listing photograph or floor plan.
+
+    ``credit`` is not decoration: these are stock images under licences that
+    require attribution, and the UI has to be able to render it.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    url: str
+    kind: ImageKind
+    alt_fi: str
+    credit: str
+    sort_order: int
+
+
+class ContactOut(BaseModel):
+    """The named person on a listing's action panel."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    name: str
+    title_fi: str
+    email: str
+    phone: str | None
+    photo_url: str | None
+
+
 class UnitOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -119,18 +150,58 @@ class UnitOut(BaseModel):
     deposit_eur: Decimal | None
     availability: Availability
     available_from: dt.date | None
+    maintenance_fee_eur: Decimal | None
+    room_layout_fi: str
+    dwelling_type: DwellingType
+    has_lift: bool
+    has_sauna: bool
+    has_balcony: bool
+    pets_allowed: bool
+    accessible: bool
+    lat: Decimal
+    lng: Decimal
+    #: The first photograph, for the result row. None only if a unit has no
+    #: images, which the seed data does not allow.
+    primary_image: UnitImageOut | None
 
 
 class UnitDetailOut(UnitOut):
     housing_form_explanation_fi: str
     description_fi: str
     description_en: str | None
+    images: list[UnitImageOut]
+    contact: ContactOut | None
 
 
 class UnitSearchOut(BaseModel):
     total: int
     units: list[UnitOut]
     cached: bool = False
+
+
+class CityOut(BaseModel):
+    """Autocomplete source for the search bar."""
+
+    city: str
+    units: int
+
+
+class FavouriteIn(BaseModel):
+    session_key: str = Field(min_length=8, max_length=64)
+    unit_id: int
+
+
+class SavedSearchIn(BaseModel):
+    session_key: str = Field(min_length=8, max_length=64)
+    name: str = Field(min_length=1, max_length=160)
+    query: dict[str, Any] = Field(min_length=1)
+
+
+class SavedSearchOut(BaseModel):
+    id: int
+    name: str
+    query: dict[str, Any]
+    created_at: dt.datetime
 
 
 class MemberIn(BaseModel):

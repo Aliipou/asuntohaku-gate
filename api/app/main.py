@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.app import cache
-from api.app.routers import admin, applications, units, viewings
+from api.app.routers import admin, applications, portal, units, viewings
 
 app = FastAPI(
     title="asuntohaku-gate",
@@ -34,6 +34,7 @@ app.add_middleware(
 app.include_router(units.router)
 app.include_router(applications.router)
 app.include_router(viewings.router)
+app.include_router(portal.router)
 app.include_router(admin.router)
 
 
