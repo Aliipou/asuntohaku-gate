@@ -34,6 +34,8 @@ AVAILABILITIES = ("vapaa", "vapautuu", "sopimuksella")
 APPLICATION_STATUSES = ("luonnos", "lahetetty", "vanhentunut")
 MEMBER_ROLES = ("paahakija", "toinen", "muu")
 NEED_SITUATIONS = ("asunnoton", "irtisanottu", "ahtaasti", "ei_tarvetta")
+DWELLING_TYPES = ("kerrostalo", "rivitalo", "omakotitalo", "luhtitalo")
+IMAGE_KINDS = ("valokuva", "pohjapiirros")
 OUTCOMES = ("kelpoinen", "puuttuvat_tiedot", "ei_kelpoinen")
 
 
@@ -66,6 +68,9 @@ class Property(Base):
     lng: Mapped[decimal.Decimal] = mapped_column(Numeric(9, 6), nullable=False)
 
     units: Mapped[list[Unit]] = relationship(
+        back_populates="property", cascade="all, delete-orphan"
+    )
+    contacts: Mapped[list[Contact]] = relationship(
         back_populates="property", cascade="all, delete-orphan"
     )
 
@@ -105,7 +110,23 @@ class Unit(Base):
     description_fi: Mapped[str] = mapped_column(Text, nullable=False)
     description_en: Mapped[str | None] = mapped_column(Text)
 
+    # Listing fields the search and detail pages need. maintenance_fee_eur is the
+    # hoitovastike, which only sale listings carry.
+    maintenance_fee_eur: Mapped[decimal.Decimal | None] = mapped_column(Numeric(10, 2))
+    room_layout_fi: Mapped[str] = mapped_column(String(60), nullable=False, default="")
+    dwelling_type: Mapped[str] = mapped_column(
+        _enum(*DWELLING_TYPES, name="dwelling_type"), nullable=False, default="kerrostalo"
+    )
+    has_lift: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    has_sauna: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    has_balcony: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    pets_allowed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    accessible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
     property: Mapped[Property] = relationship(back_populates="units")
+    images: Mapped[list[UnitImage]] = relationship(
+        back_populates="unit", cascade="all, delete-orphan", order_by="UnitImage.sort_order"
+    )
 
 
 class Application(Base):
@@ -255,4 +276,79 @@ class Offer(Base):
     contact_email: Mapped[str] = mapped_column(String(254), nullable=False)
     amount_eur: Mapped[decimal.Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     message: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class UnitImage(Base):
+    """A listing photograph or floor plan.
+
+    These are stock images under their own licences. ``credit`` carries the
+    photographer and source so the attribution the licence asks for can be
+    rendered, and they do not depict the apartments described.
+    """
+
+    __tablename__ = "unit_images"
+    __table_args__ = (
+        UniqueConstraint("unit_id", "sort_order", name="uq_unit_images_order"),
+        CheckConstraint("length(url) > 0", name="ck_unit_images_url"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    unit_id: Mapped[int] = mapped_column(
+        ForeignKey("units.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    url: Mapped[str] = mapped_column(String(500), nullable=False)
+    kind: Mapped[str] = mapped_column(_enum(*IMAGE_KINDS, name="image_kind"), nullable=False)
+    alt_fi: Mapped[str] = mapped_column(String(300), nullable=False)
+    credit: Mapped[str] = mapped_column(String(300), nullable=False)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    unit: Mapped[Unit] = relationship(back_populates="images")
+
+
+class Contact(Base):
+    """The named person on a listing's action panel."""
+
+    __tablename__ = "contacts"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    property_id: Mapped[int] = mapped_column(
+        ForeignKey("properties.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(160), nullable=False)
+    title_fi: Mapped[str] = mapped_column(String(120), nullable=False)
+    email: Mapped[str] = mapped_column(String(254), nullable=False)
+    phone: Mapped[str | None] = mapped_column(String(40))
+    photo_url: Mapped[str | None] = mapped_column(String(500))
+
+    property: Mapped[Property] = relationship(back_populates="contacts")
+
+
+class Favourite(Base):
+    """A saved apartment.
+
+    There is no login, so a favourite belongs to an opaque key the browser
+    holds. It grants access to nothing except that browser's own list.
+    """
+
+    __tablename__ = "favourites"
+    __table_args__ = (UniqueConstraint("session_key", "unit_id", name="uq_favourites"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    session_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    unit_id: Mapped[int] = mapped_column(
+        ForeignKey("units.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class SavedSearch(Base):
+    """A named filter state, stored as the query the search page encodes in its URL."""
+
+    __tablename__ = "saved_searches"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    session_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(160), nullable=False)
+    query_json: Mapped[dict[str, object]] = mapped_column(JSONB, nullable=False)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
