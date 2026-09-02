@@ -84,8 +84,37 @@ def people(count: int) -> str:
     return "1 henki" if count == 1 else f"{count} henkeä"
 
 
+def rooms(count: int) -> str:
+    """ "1 huone", but "3 huonetta" — same partitive rule as people()."""
+    return "1 huone" if count == 1 else f"{count} huonetta"
+
+
 def percent(share: Decimal) -> str:
     return f"{(share * 100).quantize(Decimal('1'))}{NBSP}%"
+
+
+def evidence_value(key: str, value: object) -> str:
+    """Format one evidence value for display.
+
+    Evidence keys carry their unit as a suffix, so the same convention formats
+    them everywhere: ``_eur`` and ``_eur_kk`` are money, ``_m2`` is an area,
+    ``osuus`` is a share. Anything else is shown as it is.
+    """
+    if isinstance(value, bool) or value is None:
+        return {True: "kyllä", False: "ei", None: "ei ilmoitettu"}[value]
+    if isinstance(value, Decimal):
+        if key.endswith(("_eur", "_eur_kk")):
+            return euros(value)
+        if key.endswith("_m2"):
+            return f"{value.normalize():f}".replace(".", ",") + f"{NBSP}m²"
+        if "osuus" in key:
+            return percent(value)
+        return f"{value.normalize():f}".replace(".", ",")
+    if isinstance(value, dt.datetime | dt.date):
+        return date(value)
+    if isinstance(value, list | tuple):
+        return ", ".join(str(item) for item in value) if value else "–"
+    return str(value)
 
 
 def _list(values: Iterable[str]) -> str:
@@ -301,20 +330,20 @@ def order_ranking(rank: int, number: str) -> str:
 # -- YLEIS-KOKO-01 ---------------------------------------------------------
 
 
-def size_fits(size: int, rooms: int) -> str:
-    return f"{size} hengen ruokakunta sopii {rooms} huoneen asuntoon."
+def size_fits(size: int, room_count: int) -> str:
+    return f"{size} hengen ruokakunta sopii {room_count} huoneen asuntoon."
 
 
-def size_too_large(size: int, rooms: int, max_size: int) -> str:
+def size_too_large(size: int, room_count: int, max_size: int) -> str:
     return (
-        f"Asunnossa on {rooms} huonetta, joten siihen valitaan enintään {max_size} hengen "
-        f"ruokakunta. Ruokakunnassasi on {size} henkeä."
+        f"Asunnossa on {rooms(room_count)}, joten siihen valitaan enintään {max_size} hengen "
+        f"ruokakunta. Ruokakunnassasi on {people(size)}."
     )
 
 
-def size_underused(size: int, rooms: int) -> str:
+def size_underused(size: int, room_count: int) -> str:
     return (
-        f"Asunnossa on {rooms} huonetta ja ruokakunnassasi on {size} henkeä. Voit hakea, "
+        f"Asunnossa on {rooms(room_count)} ja ruokakunnassasi on {people(size)}. Voit hakea, "
         "mutta suurempi ruokakunta voi saada etusijan."
     )
 
