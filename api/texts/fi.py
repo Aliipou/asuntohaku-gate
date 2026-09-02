@@ -34,6 +34,26 @@ HOUSING_FORM_LABELS = {
     "asumisoikeus": "asumisoikeusasunto",
 }
 
+#: One sentence per housing form, saying what it means for the applicant. Shown
+#: on the apartment page (SPEC section 7.2).
+HOUSING_FORM_EXPLANATIONS = {
+    "vapaarahoitteinen": (
+        "Tätä asuntoa voi hakea kuka tahansa. Tulojasi katsotaan vain sen verran, että "
+        "vuokra on maksettavissa, eikä varallisuutta tai asunnontarvetta kysytä."
+    ),
+    "lyhyt_korkotuki": (
+        "Tähän asuntoon tarkistetaan ruokakunnan tulot. Varallisuutta ja asunnontarvetta ei kysytä."
+    ),
+    "tarveharkintainen": (
+        "Tähän asuntoon arvioidaan ruokakunnan tulot, varallisuus ja asunnontarve, ja "
+        "hakijat asetetaan keskenään järjestykseen."
+    ),
+    "asumisoikeus": (
+        "Tähän asuntoon tarvitaan asumisoikeuden järjestysnumero. Tulorajaa ei ole, mutta "
+        "varallisuusraja on, ellei ruokakunnan kaikkia aikuisia koske ikäpoikkeus."
+    ),
+}
+
 OUTCOME_LABELS = {
     "kelpoinen": "Kelpoinen",
     "puuttuvat_tiedot": "Puuttuvat tiedot",
@@ -363,4 +383,52 @@ def application_expired(expires_at: dt.datetime) -> str:
     return (
         f"Hakemuksesi vanheni {date(expires_at)}. Avaa muokkauslinkki ja vahvista tiedot, "
         "niin käsittelemme hakemuksen uudelleen."
+    )
+
+
+# -- API error messages ----------------------------------------------------
+# Shown to the applicant, so they say what to do rather than what went wrong.
+
+
+def unit_not_found() -> str:
+    return "Asuntoa ei löytynyt. Se on voitu poistaa hausta."
+
+
+def application_not_found() -> str:
+    return "Hakemusta ei löytynyt. Tarkista muokkauslinkki tai aloita uusi hakemus."
+
+
+def viewing_not_found() -> str:
+    return "Näyttöaikaa ei löytynyt."
+
+
+def viewing_full() -> str:
+    return "Näyttö on täynnä. Valitse toinen näyttöaika."
+
+
+def already_booked() -> str:
+    return "Olet jo varannut paikan tähän näyttöön."
+
+
+def unit_already_in_application() -> str:
+    return "Asunto on jo hakemuksellasi."
+
+
+def unit_not_in_application() -> str:
+    return "Asunto ei ole hakemuksellasi."
+
+
+def sale_unit_cannot_be_applied_for() -> str:
+    return (
+        "Myytävää asuntoa ei haeta hakemuksella. Varaa näyttöaika tai jätä tarjous asunnon sivulla."
+    )
+
+
+def offers_only_for_sale_units() -> str:
+    return "Tarjouksen voi jättää vain myytävästä asunnosta."
+
+
+def too_many_requests() -> str:
+    return (
+        "Hakemusta on muokattu liian monta kertaa lyhyessä ajassa. Odota hetki ja yritä uudelleen."
     )
