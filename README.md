@@ -26,7 +26,14 @@ explain every decision to the applicant in Finnish.
   ones. Rules are pure functions of `(application snapshot, apartment, limits)`; the
   evaluation moment is passed in, so no rule reads a clock, a session or a database.
 - **Generated rule catalogue** — [`docs/saannot.md`](docs/saannot.md), rendered from
-  rule metadata. CI fails if the committed copy has drifted.
+  rule metadata. `python -m api.catalogue --check` fails on drift, and CI runs it.
+- **API** — the endpoint surface for search, the application and its basket, the
+  adaptive-field endpoint, decisions, viewings, offers and the ranked applicant
+  view.
+- **CI** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml): ruff, mypy
+  strict, the catalogue drift check, the migration against an empty database, and
+  pytest with coverage, all against Postgres and Redis service containers and no
+  cloud credentials.
 
 ### Seeing it work
 
@@ -64,9 +71,13 @@ yet, the answer is "we cannot decide", not "no".
 
 ## What is not built yet
 
-The API, the search and detail pages, the application form, the decisions screen, the
-admin ranking view, viewings and offers, CI and the deployment. Nothing in this
-repository serves a web page today.
+**The whole frontend.** There are no pages: no search, no apartment page, no
+application form, no decisions screen, no tenant-selection view. Nothing in this
+repository serves a web page today, and nothing is deployed. `vercel.json` is
+present but has never been used.
+
+The English locale for the listings is also unbuilt: `units.description_en` is
+empty on every row.
 
 ## Running the tests
 
@@ -77,9 +88,12 @@ python -m api.catalogue --check
 ruff check . && mypy
 ```
 
-The rule engine tests need no database. The schema has been rendered and reviewed as
-SQL (`alembic upgrade head --sql`) but has **not** yet been run against a live
-PostgreSQL instance.
+The rule engine tests need no database and run anywhere. The API contract tests
+need PostgreSQL and skip without it; set `TEST_DATABASE_URL` to run them.
+
+The migration has been applied to a real PostgreSQL 18 instance and the full
+suite — 233 tests, including the viewing-capacity trigger under two concurrency
+races — passes against it.
 
 To bring up the local database and Redis:
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+from decimal import Decimal
 
 from sqlalchemy import text
 
@@ -57,7 +58,9 @@ def test_the_form_is_filled_in_over_several_visits(client, application_token) ->
 
     assert second.status_code == 200
     member = second.json()["members"][0]
-    assert member["gross_monthly_income_eur"] == "3000"
+    # Money comes back with the column's scale (NUMERIC(10,2)), so compare as
+    # Decimal rather than as a string.
+    assert Decimal(member["gross_monthly_income_eur"]) == Decimal("3000")
     assert member["birth_year"] == 1990
 
 

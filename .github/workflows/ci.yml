@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: asuntohaku
+          POSTGRES_PASSWORD: asuntohaku
+          POSTGRES_DB: asuntohaku
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U asuntohaku"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # No cloud credentials: both services are containers on the runner.
+      TEST_DATABASE_URL: postgresql+psycopg://asuntohaku:asuntohaku@localhost:5432/asuntohaku
+      REDIS_URL: redis://localhost:6379/0
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: ruff
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: mypy strict
+        run: mypy
+
+      - name: Rule catalogue drift check
+        run: python -m api.catalogue --check
+
+      - name: Migration applies to an empty database
+        env:
+          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
+        run: alembic upgrade head
+
+      - name: pytest with coverage
+        run: pytest --cov=api --cov=seeds --cov-report=term-missing
