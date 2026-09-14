@@ -14,6 +14,8 @@
  * localStorage loses nothing but this shortcut.
  */
 
+import { createApplication, getApplication } from "./api";
+
 const SESSION_KEY_STORAGE = "ahg_session_key";
 const APPLICATION_TOKEN_STORAGE = "ahg_application_token";
 
@@ -49,4 +51,26 @@ export function getStoredApplicationToken(): string | null {
 
 export function setStoredApplicationToken(token: string): void {
   writeLocalStorage(APPLICATION_TOKEN_STORAGE, token);
+}
+
+/**
+ * The token backing "Lisää hakemukseen" / "Varaa näyttöaika": reuses the
+ * stored one if it still resolves to a real application, otherwise starts a
+ * fresh one (a stored token can go stale — the application expired, or this
+ * is a different environment's data). Never throws; a failure to create an
+ * application propagates to the caller, which already handles API errors.
+ */
+export async function ensureApplicationToken(): Promise<string> {
+  const existing = getStoredApplicationToken();
+  if (existing) {
+    try {
+      await getApplication(existing);
+      return existing;
+    } catch {
+      // Stale or invalid — fall through and start a new application.
+    }
+  }
+  const created = await createApplication();
+  setStoredApplicationToken(created.edit_token);
+  return created.edit_token;
 }
