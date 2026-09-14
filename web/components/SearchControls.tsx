@@ -3,7 +3,8 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import type { SearchFilters } from "@/lib/filters";
-import { ASUMISMUOTO_LABELS, AVAILABILITY_LABELS, tekstit } from "@/lib/tekstit";
+import type { tekstit } from "@/lib/tekstit";
+import { pickAsumismuotoLabels, pickAvailabilityLabels, type Locale } from "@/lib/locale";
 import type { Availability, CityOut, HousingForm, ListingType } from "@/lib/api";
 
 /** Auto-submits the enclosing <form> so every control change re-encodes the URL. */
@@ -17,15 +18,21 @@ export function SearchControls({
   filters,
   cities,
   total,
+  locale,
+  t,
 }: {
   filters: SearchFilters;
   cities: CityOut[];
   /** null when the search request failed — the count is then not shown. */
   total: number | null;
+  locale: Locale;
+  t: typeof tekstit;
 }) {
   const [tallennettu, setTallennettu] = useState(false);
   const advancedOpen = Boolean(filters.housingForm || filters.availability);
-  const priceLabel = filters.listingType === "myynti" ? tekstit.hintaMyyntiLabel : tekstit.hintaVuokraLabel;
+  const priceLabel = filters.listingType === "myynti" ? t.hintaMyyntiLabel : t.hintaVuokraLabel;
+  const asumismuotoLabels = pickAsumismuotoLabels(locale);
+  const availabilityLabels = pickAvailabilityLabels(locale);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     // Empty text/number inputs would otherwise land in the URL as "city=" —
@@ -48,9 +55,11 @@ export function SearchControls({
       onSubmit={onSubmit}
       className="flex flex-col gap-4 border-b border-line pb-5"
     >
+      {locale === "en" && <input type="hidden" name="lang" value="en" />}
+
       <div
         role="radiogroup"
-        aria-label={tekstit.valitseVuokraTaiMyynti}
+        aria-label={t.valitseVuokraTaiMyynti}
         className="inline-flex w-fit rounded-full border border-line bg-paper-raised p-1"
       >
         {(["vuokra", "myynti"] as ListingType[]).map((value) => (
@@ -66,20 +75,20 @@ export function SearchControls({
               onChange={autoSubmit}
               className="sr-only"
             />
-            {value === "vuokra" ? tekstit.vuokrattavat : tekstit.myytavat}
+            {value === "vuokra" ? t.vuokrattavat : t.myytavat}
           </label>
         ))}
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-ink">{tekstit.kaupunki}</span>
+          <span className="font-medium text-ink">{t.kaupunki}</span>
           <input
             type="text"
             name="city"
             list="kaupunki-lista"
             defaultValue={filters.city ?? ""}
-            placeholder={tekstit.kaupunkiPlaceholder}
+            placeholder={t.kaupunkiPlaceholder}
             onBlur={(e) => e.currentTarget.form?.requestSubmit()}
             className="w-40 rounded-md border border-line bg-paper-raised px-3 py-1.5 text-ink outline-none focus-visible:border-accent"
           />
@@ -91,16 +100,16 @@ export function SearchControls({
         </label>
 
         <fieldset className="flex flex-col gap-1 text-sm">
-          <legend className="font-medium text-ink">{tekstit.huoneet}</legend>
+          <legend className="font-medium text-ink">{t.huoneet}</legend>
           <div className="flex items-center gap-1.5">
             <select
               name="rooms_min"
               defaultValue={filters.roomsMin ?? ""}
               onChange={autoSubmit}
-              aria-label={tekstit.huoneitaVahintaan}
+              aria-label={t.huoneitaVahintaan}
               className="rounded-md border border-line bg-paper-raised px-2 py-1.5 text-ink outline-none focus-visible:border-accent"
             >
-              <option value="">{tekstit.kaikki}</option>
+              <option value="">{t.kaikki}</option>
               {ROOM_OPTIONS.map((n) => (
                 <option key={n} value={n}>
                   {n}+
@@ -114,10 +123,10 @@ export function SearchControls({
               name="rooms_max"
               defaultValue={filters.roomsMax ?? ""}
               onChange={autoSubmit}
-              aria-label={tekstit.huoneitaEnintaan}
+              aria-label={t.huoneitaEnintaan}
               className="rounded-md border border-line bg-paper-raised px-2 py-1.5 text-ink outline-none focus-visible:border-accent"
             >
-              <option value="">{tekstit.kaikki}</option>
+              <option value="">{t.kaikki}</option>
               {ROOM_OPTIONS.map((n) => (
                 <option key={n} value={n}>
                   {n}
@@ -137,8 +146,8 @@ export function SearchControls({
               step={filters.listingType === "myynti" ? 5000 : 50}
               name="price_min"
               defaultValue={filters.priceMin ?? ""}
-              placeholder={tekstit.hintaAlkaen}
-              aria-label={tekstit.hintaAlkaen}
+              placeholder={t.hintaAlkaen}
+              aria-label={t.hintaAlkaen}
               onBlur={(e) => e.currentTarget.form?.requestSubmit()}
               className="w-24 rounded-md border border-line bg-paper-raised px-2 py-1.5 text-ink outline-none focus-visible:border-accent"
             />
@@ -152,8 +161,8 @@ export function SearchControls({
               step={filters.listingType === "myynti" ? 5000 : 50}
               name="price_max"
               defaultValue={filters.priceMax ?? ""}
-              placeholder={tekstit.hintaEnintaan}
-              aria-label={tekstit.hintaEnintaan}
+              placeholder={t.hintaEnintaan}
+              aria-label={t.hintaEnintaan}
               onBlur={(e) => e.currentTarget.form?.requestSubmit()}
               className="w-24 rounded-md border border-line bg-paper-raised px-2 py-1.5 text-ink outline-none focus-visible:border-accent"
             />
@@ -164,48 +173,51 @@ export function SearchControls({
           type="submit"
           className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-ink hover:opacity-90"
         >
-          {tekstit.hae}
+          {t.hae}
         </button>
 
-        <Link href="/" className="text-sm text-ink-muted underline-offset-2 hover:underline">
-          {tekstit.nollaaHakuehdot}
+        <Link
+          href={locale === "en" ? "/?lang=en" : "/"}
+          className="text-sm text-ink-muted underline-offset-2 hover:underline"
+        >
+          {t.nollaaHakuehdot}
         </Link>
       </div>
 
       <details open={advancedOpen} className="text-sm">
         <summary className="w-fit cursor-pointer select-none font-medium text-accent">
-          {tekstit.lisaaHakuehtoja}
+          {t.lisaaHakuehtoja}
         </summary>
         <div className="mt-3 flex flex-wrap gap-3">
           <label className="flex flex-col gap-1">
-            <span className="font-medium text-ink">{tekstit.asumismuoto}</span>
+            <span className="font-medium text-ink">{t.asumismuoto}</span>
             <select
               name="housing_form"
               defaultValue={filters.housingForm ?? ""}
               onChange={autoSubmit}
               className="rounded-md border border-line bg-paper-raised px-2 py-1.5 text-ink outline-none focus-visible:border-accent"
             >
-              <option value="">{tekstit.kaikki}</option>
-              {(Object.keys(ASUMISMUOTO_LABELS) as HousingForm[]).map((form) => (
+              <option value="">{t.kaikki}</option>
+              {(Object.keys(asumismuotoLabels) as HousingForm[]).map((form) => (
                 <option key={form} value={form}>
-                  {ASUMISMUOTO_LABELS[form]}
+                  {asumismuotoLabels[form]}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="font-medium text-ink">{tekstit.vapautuminen}</span>
+            <span className="font-medium text-ink">{t.vapautuminen}</span>
             <select
               name="availability"
               defaultValue={filters.availability ?? ""}
               onChange={autoSubmit}
               className="rounded-md border border-line bg-paper-raised px-2 py-1.5 text-ink outline-none focus-visible:border-accent"
             >
-              <option value="">{tekstit.kaikki}</option>
-              {(Object.keys(AVAILABILITY_LABELS) as Availability[]).map((value) => (
+              <option value="">{t.kaikki}</option>
+              {(Object.keys(availabilityLabels) as Availability[]).map((value) => (
                 <option key={value} value={value}>
-                  {AVAILABILITY_LABELS[value]}
+                  {availabilityLabels[value]}
                 </option>
               ))}
             </select>
@@ -215,7 +227,7 @@ export function SearchControls({
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <p aria-live="polite" className="tabular-nums text-sm text-ink-muted">
-          {total !== null ? tekstit.tulosMaara(total) : null}
+          {total !== null ? t.tulosMaara(total) : null}
         </p>
 
         <div className="flex items-center gap-3">
@@ -225,21 +237,21 @@ export function SearchControls({
             onClick={() => setTallennettu((v) => !v)}
             className="text-sm font-medium text-accent hover:underline"
           >
-            {tallennettu ? tekstit.hakuTallennettu : tekstit.tallennaHaku}
+            {tallennettu ? t.hakuTallennettu : t.tallennaHaku}
           </button>
 
           <label className="flex items-center gap-2 text-sm">
-            <span className="font-medium text-ink">{tekstit.jarjestys}</span>
+            <span className="font-medium text-ink">{t.jarjestys}</span>
             <select
               name="sort"
               defaultValue={filters.sort}
               onChange={autoSubmit}
               className="rounded-md border border-line bg-paper-raised px-2 py-1.5 text-ink outline-none focus-visible:border-accent"
             >
-              <option value="uusimmat">{tekstit.uusimmat}</option>
-              <option value="halvin">{tekstit.halvinEnsin}</option>
-              <option value="kallein">{tekstit.kalleinEnsin}</option>
-              <option value="suurin">{tekstit.suurinPintaAla}</option>
+              <option value="uusimmat">{t.uusimmat}</option>
+              <option value="halvin">{t.halvinEnsin}</option>
+              <option value="kallein">{t.kalleinEnsin}</option>
+              <option value="suurin">{t.suurinPintaAla}</option>
             </select>
           </label>
         </div>

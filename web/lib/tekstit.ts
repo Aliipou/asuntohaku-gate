@@ -70,7 +70,70 @@ export const tekstit = {
 
   // Map
   kartta: "Kartta",
-} as const;
+
+  // Listing page (asunnot/[id]) — gallery
+  pohjapiirros: "Pohjapiirros",
+  edellinenKuva: "Edellinen kuva",
+  seuraavaKuva: "Seuraava kuva",
+  kuvaNumero(n: number, total: number): string {
+    return `Kuva ${n}/${total}`;
+  },
+
+  // Listing page — dense key-facts table (spec section 7's exact labels)
+  sijainti: "Sijainti",
+  huoneistoselitelma: "Huoneistoselitelmä",
+  pintaAla: "Pinta-ala",
+  kerrosFakta: "Kerros",
+  vapautuuFakta: "Vapautuu",
+  rakennusvuosi: "Rakennusvuosi",
+  hissi: "Hissi",
+  saunaFakta: "Sauna",
+  parveke: "Parveke",
+  lemmikit: "Lemmikit",
+  esteeton: "Esteetön",
+  kylla: "Kyllä",
+  ei: "Ei",
+
+  // Listing page — one sentence on what the housing form asks, linking onward
+  lueHakemuksesta: "Lue hakemuksesta",
+
+  // Listing page — action panel
+  yhteyshenkilo: "Yhteyshenkilö",
+  soita: "Soita",
+  lahetaSahkopostia: "Lähetä sähköpostia",
+  lisaaHakemukseen: "Lisää hakemukseen",
+  lisattyHakemukseen: "Lisätty hakemukseen",
+  aloitaHakemus: "Aloita hakemus lisäämällä tämä asunto",
+  avaaHakemus: "Avaa hakemus",
+  varaaNayttoaika: "Varaa näyttöaika",
+  jataTarjous: "Jätä tarjous",
+  eiNaytettavissa: "Ei tulevia näyttöaikoja tällä hetkellä.",
+  paikkojaJaljella(n: number): string {
+    return n === 1 ? "1 paikka jäljellä" : `${n} paikkaa jäljellä`;
+  },
+  taynna: "Täynnä",
+  varaaValittuAika: "Varaa valittu aika",
+  naytonVarausOnnistui: "Näyttöaika varattu. Vahvistus lähetetään hakemuksen yhteystietoihin.",
+  naytonVarausEpaonnistui: "Näyttöaikaa ei voitu varata. Se saattoi juuri täyttyä — kokeile toista aikaa.",
+  tarvitaanHakemusEnsin: "Näyttöajan varaaminen vaatii hakemuksen. Aloita hakemus ensin.",
+
+  // Listing page — offer form (sale units)
+  tarjoajanNimi: "Nimi",
+  sahkoposti: "Sähköposti",
+  tarjousSumma: "Tarjoussumma (€)",
+  viestiValinnainen: "Viesti (valinnainen)",
+  lahetaTarjousPainike: "Lähetä tarjous",
+  tarjousLahetetty: "Tarjous lähetetty. Yhteyshenkilö on sinuun yhteydessä.",
+  tarjousEpaonnistui: "Tarjousta ei voitu lähettää. Tarkista tiedot ja yritä uudelleen.",
+
+  // Listing page — similar units, errors, locale toggle
+  vastaaviaAsuntoja: "Vastaavia asuntoja",
+  asuntoaEiLoytynyt: "Asuntoa ei löytynyt.",
+  asunnonLataaminenEpaonnistui: "Asunnon tietoja ei voitu ladata juuri nyt.",
+  takaisinHakuun: "Takaisin hakuun",
+  inEnglish: "In English",
+  suomeksi: "Suomeksi",
+};
 
 /**
  * Static Finnish labels for the housing-form filter control. Distinct from

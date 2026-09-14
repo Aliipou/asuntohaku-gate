@@ -6,7 +6,7 @@ import Image from "next/image";
 import { addFavourite, removeFavourite, type UnitOut } from "@/lib/api";
 import { getSessionKey } from "@/lib/browserState";
 import { formatArea, formatEuros } from "@/lib/format";
-import { tekstit } from "@/lib/tekstit";
+import type { tekstit } from "@/lib/tekstit";
 
 function HeartIcon({ filled }: { filled: boolean }) {
   return (
@@ -39,11 +39,16 @@ export function UnitRow({
   active = false,
   favourite = false,
   onHover,
+  href,
+  t,
 }: {
   unit: UnitOut;
   active?: boolean;
   favourite?: boolean;
   onHover?: (id: number | null) => void;
+  /** Detail-page link for this unit, with any `?lang=` already applied. */
+  href: string;
+  t: typeof tekstit;
 }) {
   const [suosikki, setSuosikki] = useState(favourite);
   // Adjusted during render (not an effect) when the favourites list arrives
@@ -85,7 +90,7 @@ export function UnitRow({
       onMouseLeave={() => onHover?.(null)}
     >
       <Link
-        href={`/asunnot/${unit.id}`}
+        href={href}
         onFocus={() => onHover?.(unit.id)}
         onBlur={() => onHover?.(null)}
         className="flex h-24 w-24 shrink-0 overflow-hidden rounded-md bg-[color-mix(in_srgb,var(--color-ink)_6%,var(--color-paper))] sm:h-32 sm:w-40"
@@ -101,20 +106,20 @@ export function UnitRow({
           />
         ) : (
           <span className="flex h-full w-full items-center justify-center text-center text-xs text-ink-muted">
-            {tekstit.kuvaPuuttuu}
+            {t.kuvaPuuttuu}
           </span>
         )}
       </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex items-start justify-between gap-3">
-          <Link href={`/asunnot/${unit.id}`} className="tabular-nums text-2xl font-semibold leading-tight text-ink hover:underline">
+          <Link href={href} className="tabular-nums text-2xl font-semibold leading-tight text-ink hover:underline">
             {headlinePrice !== null && headlinePrice !== undefined
               ? formatEuros(headlinePrice)
-              : tekstit.eiTiedossa}
+              : t.eiTiedossa}
             {isRental && (
               <span className="ml-1 text-base font-normal text-ink-muted">
-                / {tekstit.kuukausi}
+                / {t.kuukausi}
               </span>
             )}
           </Link>
@@ -122,7 +127,7 @@ export function UnitRow({
             type="button"
             disabled={pending}
             aria-pressed={suosikki}
-            aria-label={suosikki ? tekstit.poistaSuosikeista : tekstit.lisaaSuosikkeihin}
+            aria-label={suosikki ? t.poistaSuosikeista : t.lisaaSuosikkeihin}
             onClick={toggleFavourite}
             className="shrink-0 rounded-full p-1.5 text-ink-muted transition-colors hover:text-accent focus-visible:text-accent motion-reduce:transition-none"
           >
@@ -132,7 +137,7 @@ export function UnitRow({
           </button>
         </div>
 
-        <Link href={`/asunnot/${unit.id}`} className="truncate text-sm text-ink-muted hover:underline">
+        <Link href={href} className="truncate text-sm text-ink-muted hover:underline">
           {unit.property_name} · {unit.street}, {unit.city}
         </Link>
 
@@ -143,32 +148,32 @@ export function UnitRow({
         {isRental ? (
           <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm">
             <div className="flex justify-between gap-2">
-              <dt className="text-ink-muted">{tekstit.vuokra}</dt>
+              <dt className="text-ink-muted">{t.vuokra}</dt>
               <dd className="tabular-nums text-ink">
-                {unit.rent_eur ? `${formatEuros(unit.rent_eur)} / ${tekstit.kuukausi}` : tekstit.eiTiedossa}
+                {unit.rent_eur ? `${formatEuros(unit.rent_eur)} / ${t.kuukausi}` : t.eiTiedossa}
               </dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-ink-muted">{tekstit.vakuus}</dt>
+              <dt className="text-ink-muted">{t.vakuus}</dt>
               <dd className="tabular-nums text-ink">
-                {unit.deposit_eur ? formatEuros(unit.deposit_eur) : tekstit.eiTiedossa}
+                {unit.deposit_eur ? formatEuros(unit.deposit_eur) : t.eiTiedossa}
               </dd>
             </div>
           </dl>
         ) : (
           <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm">
             <div className="flex justify-between gap-2">
-              <dt className="text-ink-muted">{tekstit.velatonHinta}</dt>
+              <dt className="text-ink-muted">{t.velatonHinta}</dt>
               <dd className="tabular-nums text-ink">
-                {unit.price_eur ? formatEuros(unit.price_eur) : tekstit.eiTiedossa}
+                {unit.price_eur ? formatEuros(unit.price_eur) : t.eiTiedossa}
               </dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-ink-muted">{tekstit.hoitovastike}</dt>
+              <dt className="text-ink-muted">{t.hoitovastike}</dt>
               <dd className="tabular-nums text-ink">
                 {unit.maintenance_fee_eur
-                  ? `${formatEuros(unit.maintenance_fee_eur)} / ${tekstit.kuukausi}`
-                  : tekstit.eiTiedossa}
+                  ? `${formatEuros(unit.maintenance_fee_eur)} / ${t.kuukausi}`
+                  : t.eiTiedossa}
               </dd>
             </div>
           </dl>

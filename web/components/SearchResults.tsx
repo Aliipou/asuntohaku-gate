@@ -6,7 +6,8 @@ import type { UnitOut } from "@/lib/api";
 import { getFavourites } from "@/lib/api";
 import { getSessionKey } from "@/lib/browserState";
 import { formatEuros } from "@/lib/format";
-import { tekstit } from "@/lib/tekstit";
+import type { tekstit } from "@/lib/tekstit";
+import type { Locale } from "@/lib/locale";
 import { UnitRow } from "./UnitRow";
 import { Map, type MapPoint } from "./Map";
 
@@ -15,10 +16,19 @@ import { Map, type MapPoint } from "./Map";
  * price pins, the two linked so hovering a row highlights its pin and vice
  * versa. A single `hoveredId` piece of state, lifted here, is the whole link.
  */
-export function SearchResults({ units }: { units: UnitOut[] }) {
+export function SearchResults({
+  units,
+  locale,
+  t,
+}: {
+  units: UnitOut[];
+  locale: Locale;
+  t: typeof tekstit;
+}) {
   const router = useRouter();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [favouriteIds, setFavouriteIds] = useState<Set<number>>(new Set());
+  const langSuffix = locale === "en" ? "?lang=en" : "";
 
   useEffect(() => {
     let cancelled = false;
@@ -39,7 +49,7 @@ export function SearchResults({ units }: { units: UnitOut[] }) {
     () =>
       units.map((unit) => {
         const price = unit.listing_type === "vuokra" ? unit.rent_eur : unit.price_eur;
-        const label = price ? formatEuros(price) : tekstit.eiTiedossa;
+        const label = price ? formatEuros(price) : t.eiTiedossa;
         return {
           id: unit.id,
           lat: Number(unit.lat),
@@ -48,7 +58,7 @@ export function SearchResults({ units }: { units: UnitOut[] }) {
           title: `${label} — ${unit.property_name} ${unit.unit_number}, ${unit.city}`,
         };
       }),
-    [units],
+    [units, t],
   );
 
   return (
@@ -56,13 +66,15 @@ export function SearchResults({ units }: { units: UnitOut[] }) {
       <ol className="flex flex-col gap-3">
         {units.length === 0 ? (
           <li className="rounded-md border border-line bg-paper-raised p-4 text-ink-muted">
-            {tekstit.eiTuloksia}
+            {t.eiTuloksia}
           </li>
         ) : (
           units.map((unit) => (
             <UnitRow
               key={unit.id}
               unit={unit}
+              href={`/asunnot/${unit.id}${langSuffix}`}
+              t={t}
               active={hoveredId === unit.id}
               favourite={favouriteIds.has(unit.id)}
               onHover={setHoveredId}
@@ -76,7 +88,7 @@ export function SearchResults({ units }: { units: UnitOut[] }) {
           points={points}
           activeId={hoveredId}
           onHoverPoint={setHoveredId}
-          onSelectPoint={(id) => router.push(`/asunnot/${id}`)}
+          onSelectPoint={(id) => router.push(`/asunnot/${id}${langSuffix}`)}
           className="h-full min-h-[24rem] w-full"
         />
       </div>
