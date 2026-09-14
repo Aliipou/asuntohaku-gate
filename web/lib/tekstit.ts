@@ -68,9 +68,8 @@ export const tekstit = {
   eiTiedossa: "Ei tiedossa",
   kuukausi: "kk",
 
-  // Map (placeholder for now — see spec section 7, "Map")
+  // Map
   kartta: "Kartta",
-  karttaPlaceholder: "Karttanäkymä hintapinnoin lisätään tähän myöhemmin (MapLibre GL JS).",
 } as const;
 
 /**

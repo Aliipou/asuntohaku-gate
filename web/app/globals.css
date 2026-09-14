@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
 
 /*
  * Base palette per asuntohaku-gate-SPEC.md section 7: an off-white paper
@@ -43,6 +44,35 @@ body {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/*
+ * Price-pin markers for components/Map.tsx. Plain DOM elements (not a
+ * MapLibre symbol layer) so they can be regular focusable buttons that share
+ * :focus-visible with the rest of the app, and so the search page's list-row
+ * <-> pin hover link is just a class toggle, not a re-render of the map.
+ */
+.map-pin {
+  cursor: pointer;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  box-shadow: 0 1px 2px rgb(28 35 51 / 0.15);
+  white-space: nowrap;
+  transform: translate(-50%, -100%);
+}
+
+.map-pin[data-active="true"],
+.map-pin:hover,
+.map-pin:focus-visible {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
+  z-index: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

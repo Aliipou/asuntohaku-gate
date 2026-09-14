@@ -28,10 +28,30 @@ export type ListingType = "vuokra" | "myynti";
 export type Availability = "vapaa" | "vapautuu" | "sopimuksella";
 export type MemberRole = "paahakija" | "toinen" | "muu";
 export type NeedSituation = "asunnoton" | "irtisanottu" | "ahtaasti" | "ei_tarvetta";
+export type DwellingType = "kerrostalo" | "rivitalo" | "omakotitalo" | "luhtitalo";
+export type ImageKind = "valokuva" | "pohjapiirros";
+export type SortOrder = "uusimmat" | "halvin" | "kallein" | "suurin";
 
 // ---------------------------------------------------------------------------
 // Units
 // ---------------------------------------------------------------------------
+
+export interface UnitImageOut {
+  url: string;
+  kind: ImageKind;
+  alt_fi: string;
+  /** Attribution text for a stock photo used under its own licence. Always render it. */
+  credit: string;
+  sort_order: number;
+}
+
+export interface ContactOut {
+  name: string;
+  title_fi: string;
+  email: string;
+  phone: string | null;
+  photo_url: string | null;
+}
 
 export interface UnitOut {
   id: number;
@@ -56,25 +76,28 @@ export interface UnitOut {
   deposit_eur: string | null;
   availability: Availability;
   available_from: string | null;
-
-  /**
-   * NOT present in api/app/schemas.py::UnitOut as of this writing. The result
-   * card metadata line ("2h + kk + s · 54,5 m² · 3. krs") needs a written
-   * room layout, and the sale-row facts need a maintenance fee, but api/ is
-   * being edited concurrently by another process and neither field has
-   * landed in the search response yet. Typed optional so the UI already
-   * degrades (see components/UnitRow.tsx) and picks up real values the
-   * moment the backend adds them, without another frontend change.
-   */
-  room_layout_fi?: string;
-  /** See room_layout_fi comment above — same situation, sale units only. */
-  maintenance_fee_eur?: string | null;
+  /** Sale units only; null for rentals. Decimal as string. */
+  maintenance_fee_eur: string | null;
+  /** e.g. "2h + kk + s". */
+  room_layout_fi: string;
+  dwelling_type: DwellingType;
+  has_lift: boolean;
+  has_sauna: boolean;
+  has_balcony: boolean;
+  pets_allowed: boolean;
+  accessible: boolean;
+  lat: string;
+  lng: string;
+  /** The first photograph (never a floor plan). Null only if a unit has no images. */
+  primary_image: UnitImageOut | null;
 }
 
 export interface UnitDetailOut extends UnitOut {
   housing_form_explanation_fi: string;
   description_fi: string;
   description_en: string | null;
+  images: UnitImageOut[];
+  contact: ContactOut | null;
 }
 
 export interface UnitSearchOut {
@@ -95,6 +118,7 @@ export interface UnitSearchParams {
   rent_max?: number;
   price_min?: number;
   price_max?: number;
+  sort?: SortOrder;
   limit?: number;
   offset?: number;
 }
@@ -124,6 +148,7 @@ export interface DecisionOut {
   housing_form: HousingForm;
   outcome: OutcomeValue;
   outcome_label_fi: string;
+  /** The rule that produced the outcome. For 'kelpoinen', every rule agreed — show `rules`. */
   deciding_rule_id: string;
   message_fi: string;
   evidence: EvidenceItem[];
@@ -206,7 +231,7 @@ export interface ApplicationOut {
 
 export interface AddUnitIn {
   unit_id: number;
-  preference_rank?: number;
+  preference_rank?: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -262,6 +287,7 @@ export interface ApplicantRankingOut {
   unit_id: number;
   unit_label: string;
   housing_form: HousingForm;
+  /** Absent for housing forms that do not rank applicants against each other. */
   ranking_rule_id: string | null;
   ranking_basis_fi: string | null;
   applicants: RankedApplicantOut[];
@@ -272,15 +298,15 @@ export interface ErrorOut {
   message_fi: string;
 }
 
-export interface FavouriteOut {
-  unit_id: number;
-  created_at: string;
+export interface CityOut {
+  city: string;
+  units: number;
 }
 
 export interface SavedSearchOut {
   id: number;
   name: string;
-  query_json: Record<string, unknown>;
+  query: Record<string, unknown>;
   created_at: string;
 }
 
@@ -380,8 +406,8 @@ export function createOffer(unitId: number, payload: OfferIn): Promise<OfferOut>
   });
 }
 
-export function getCities(): Promise<string[]> {
-  return request<string[]>("/api/cities");
+export function getCities(): Promise<CityOut[]> {
+  return request<CityOut[]>("/api/cities");
 }
 
 export function createApplication(payload: ApplicationCreate = {}): Promise<ApplicationOut> {
@@ -426,19 +452,20 @@ export function getDecisions(token: string): Promise<DecisionOut[]> {
   return request<DecisionOut[]>(`/api/applications/${token}/decisions`);
 }
 
-export function getFavourites(sessionKey: string): Promise<FavouriteOut[]> {
-  return request<FavouriteOut[]>(`/api/favourites${query({ session_key: sessionKey })}`);
+/** Every favourites endpoint returns the caller's full, current favourites list. */
+export function getFavourites(sessionKey: string): Promise<UnitOut[]> {
+  return request<UnitOut[]>(`/api/favourites${query({ session_key: sessionKey })}`);
 }
 
-export function addFavourite(sessionKey: string, unitId: number): Promise<FavouriteOut> {
-  return request<FavouriteOut>("/api/favourites", {
+export function addFavourite(sessionKey: string, unitId: number): Promise<UnitOut[]> {
+  return request<UnitOut[]>("/api/favourites", {
     method: "POST",
     body: JSON.stringify({ session_key: sessionKey, unit_id: unitId }),
   });
 }
 
-export function removeFavourite(sessionKey: string, unitId: number): Promise<void> {
-  return request<void>(`/api/favourites/${unitId}${query({ session_key: sessionKey })}`, {
+export function removeFavourite(sessionKey: string, unitId: number): Promise<UnitOut[]> {
+  return request<UnitOut[]>(`/api/favourites/${unitId}${query({ session_key: sessionKey })}`, {
     method: "DELETE",
   });
 }
@@ -454,7 +481,7 @@ export function createSavedSearch(
 ): Promise<SavedSearchOut> {
   return request<SavedSearchOut>("/api/saved-searches", {
     method: "POST",
-    body: JSON.stringify({ session_key: sessionKey, name, query_json: queryJson }),
+    body: JSON.stringify({ session_key: sessionKey, name, query: queryJson }),
   });
 }
 

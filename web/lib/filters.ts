@@ -124,7 +124,7 @@ export function filtersToSearchParams(filters: SearchFilters): URLSearchParams {
  * row's price is a recurring rent and a sale row's is a purchase price.
  */
 export function toApiSearchParams(filters: SearchFilters): UnitSearchParams {
-  const out: UnitSearchParams = { listing_type: filters.listingType };
+  const out: UnitSearchParams = { listing_type: filters.listingType, sort: filters.sort };
   if (filters.city) out.city = filters.city;
   if (filters.housingForm) out.housing_form = filters.housingForm;
   if (filters.availability) out.availability = filters.availability;
@@ -141,16 +141,15 @@ export function toApiSearchParams(filters: SearchFilters): UnitSearchParams {
 }
 
 /**
- * Client-side sort for the four sort orders the search page offers.
+ * Sort for the four sort orders the search page offers.
  *
- * GET /api/units (api/app/routers/units.py) does not currently accept a
- * `sort` parameter, even though spec section 6 says search "accepts the sort
- * order the UI offers". Rather than block the search page on that endpoint
- * gaining a parameter — api/ is being edited by a concurrent process — the
- * page fetches unsorted and orders the page of results itself. "uusimmat"
+ * GET /api/units (api/app/routers/units.py) now accepts and applies a `sort`
+ * parameter server-side (toApiSearchParams passes it through), so this is a
+ * defensive re-sort of an already-sorted page rather than the only ordering
+ * step — kept because it's cheap, keeps client-held lists (e.g. favourites)
+ * orderable the same way, and is exercised directly by tests. "uusimmat"
  * (newest first) uses descending `id` as a stand-in for recency, since
- * UnitOut carries no created_at/listed_at field to sort on; swap this for a
- * real timestamp field the moment one exists.
+ * UnitOut carries no created_at/listed_at field to sort on.
  */
 export function sortUnits<T extends Pick<UnitOut, "id" | "area_m2" | "rent_eur" | "price_eur">>(
   units: readonly T[],

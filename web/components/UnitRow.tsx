@@ -1,15 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import type { UnitOut } from "@/lib/api";
+import Link from "next/link";
+import Image from "next/image";
+import { addFavourite, removeFavourite, type UnitOut } from "@/lib/api";
+import { getSessionKey } from "@/lib/browserState";
 import { formatArea, formatEuros } from "@/lib/format";
 import { tekstit } from "@/lib/tekstit";
-
-function roomsLabel(unit: UnitOut): string {
-  // room_layout_fi (e.g. "2h + kk + s") isn't in the API response yet — see
-  // the comment on UnitOut in lib/api.ts. Fall back to a plain room count.
-  return unit.room_layout_fi ?? `${unit.rooms}h`;
-}
 
 function HeartIcon({ filled }: { filled: boolean }) {
   return (
@@ -32,24 +29,86 @@ function HeartIcon({ filled }: { filled: boolean }) {
  * One result card. Structural difference between rental and sale stock, per
  * spec section 7: a rental row's facts are rent + deposit, a sale row's are
  * price + maintenance fee — that split changes the markup, not just a badge.
+ *
+ * Also the linked half of the search page's list <-> map hover: `onHover`
+ * tells the map which pin to highlight, `active` reflects the map's own
+ * hover/focus of this unit's pin back onto the row.
  */
-export function UnitRow({ unit }: { unit: UnitOut }) {
-  const [suosikki, setSuosikki] = useState(false);
+export function UnitRow({
+  unit,
+  active = false,
+  favourite = false,
+  onHover,
+}: {
+  unit: UnitOut;
+  active?: boolean;
+  favourite?: boolean;
+  onHover?: (id: number | null) => void;
+}) {
+  const [suosikki, setSuosikki] = useState(favourite);
+  // Adjusted during render (not an effect) when the favourites list arrives
+  // after this row already mounted — see
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [lastFavouriteProp, setLastFavouriteProp] = useState(favourite);
+  if (favourite !== lastFavouriteProp) {
+    setLastFavouriteProp(favourite);
+    setSuosikki(favourite);
+  }
+  const [pending, setPending] = useState(false);
   const isRental = unit.listing_type === "vuokra";
   const headlinePrice = isRental ? unit.rent_eur : unit.price_eur;
 
+  async function toggleFavourite() {
+    const next = !suosikki;
+    setSuosikki(next);
+    setPending(true);
+    try {
+      const sessionKey = getSessionKey();
+      if (next) {
+        await addFavourite(sessionKey, unit.id);
+      } else {
+        await removeFavourite(sessionKey, unit.id);
+      }
+    } catch {
+      setSuosikki(!next); // the API call failed — don't leave the UI claiming a state that isn't saved
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
-    <li className="flex gap-4 rounded-lg border border-line bg-paper-raised p-3 sm:gap-5 sm:p-4">
-      <div
-        aria-hidden="true"
-        className="flex h-24 w-24 shrink-0 items-center justify-center rounded-md bg-[color-mix(in_srgb,var(--color-ink)_6%,var(--color-paper))] text-center text-xs text-ink-muted sm:h-32 sm:w-40"
+    <li
+      className={`flex gap-4 rounded-lg border p-3 transition-colors sm:gap-5 sm:p-4 motion-reduce:transition-none ${
+        active ? "border-accent bg-paper-raised" : "border-line bg-paper-raised"
+      }`}
+      onMouseEnter={() => onHover?.(unit.id)}
+      onMouseLeave={() => onHover?.(null)}
+    >
+      <Link
+        href={`/asunnot/${unit.id}`}
+        onFocus={() => onHover?.(unit.id)}
+        onBlur={() => onHover?.(null)}
+        className="flex h-24 w-24 shrink-0 overflow-hidden rounded-md bg-[color-mix(in_srgb,var(--color-ink)_6%,var(--color-paper))] sm:h-32 sm:w-40"
       >
-        {tekstit.kuvaPuuttuu}
-      </div>
+        {unit.primary_image ? (
+          <Image
+            src={unit.primary_image.url}
+            alt={unit.primary_image.alt_fi}
+            width={160}
+            height={128}
+            className="h-full w-full object-cover"
+            unoptimized
+          />
+        ) : (
+          <span className="flex h-full w-full items-center justify-center text-center text-xs text-ink-muted">
+            {tekstit.kuvaPuuttuu}
+          </span>
+        )}
+      </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex items-start justify-between gap-3">
-          <p className="tabular-nums text-2xl font-semibold leading-tight text-ink">
+          <Link href={`/asunnot/${unit.id}`} className="tabular-nums text-2xl font-semibold leading-tight text-ink hover:underline">
             {headlinePrice !== null && headlinePrice !== undefined
               ? formatEuros(headlinePrice)
               : tekstit.eiTiedossa}
@@ -58,12 +117,13 @@ export function UnitRow({ unit }: { unit: UnitOut }) {
                 / {tekstit.kuukausi}
               </span>
             )}
-          </p>
+          </Link>
           <button
             type="button"
+            disabled={pending}
             aria-pressed={suosikki}
             aria-label={suosikki ? tekstit.poistaSuosikeista : tekstit.lisaaSuosikkeihin}
-            onClick={() => setSuosikki((v) => !v)}
+            onClick={toggleFavourite}
             className="shrink-0 rounded-full p-1.5 text-ink-muted transition-colors hover:text-accent focus-visible:text-accent motion-reduce:transition-none"
           >
             <span className={suosikki ? "text-accent" : undefined}>
@@ -72,12 +132,12 @@ export function UnitRow({ unit }: { unit: UnitOut }) {
           </button>
         </div>
 
-        <p className="truncate text-sm text-ink-muted">
+        <Link href={`/asunnot/${unit.id}`} className="truncate text-sm text-ink-muted hover:underline">
           {unit.property_name} · {unit.street}, {unit.city}
-        </p>
+        </Link>
 
         <p className="tabular-nums truncate text-sm text-ink">
-          {roomsLabel(unit)} · {formatArea(unit.area_m2)} · {unit.floor}. krs
+          {unit.room_layout_fi} · {formatArea(unit.area_m2)} · {unit.floor}. krs
         </p>
 
         {isRental ? (

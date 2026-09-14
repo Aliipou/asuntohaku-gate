@@ -4,7 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import type { SearchFilters } from "@/lib/filters";
 import { ASUMISMUOTO_LABELS, AVAILABILITY_LABELS, tekstit } from "@/lib/tekstit";
-import type { Availability, HousingForm, ListingType } from "@/lib/api";
+import type { Availability, CityOut, HousingForm, ListingType } from "@/lib/api";
 
 /** Auto-submits the enclosing <form> so every control change re-encodes the URL. */
 function autoSubmit(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -19,7 +19,7 @@ export function SearchControls({
   total,
 }: {
   filters: SearchFilters;
-  cities: string[];
+  cities: CityOut[];
   /** null when the search request failed — the count is then not shown. */
   total: number | null;
 }) {
@@ -85,7 +85,7 @@ export function SearchControls({
           />
           <datalist id="kaupunki-lista">
             {cities.map((city) => (
-              <option key={city} value={city} />
+              <option key={city.city} value={city.city} />
             ))}
           </datalist>
         </label>
