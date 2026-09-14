@@ -1,16 +1,20 @@
 # asuntohaku-gate
 
-**Keskeneräinen.** Tästä on toistaiseksi rakennettu tietokantarakenne, sääntömoottori
-ja generoitu sääntöluettelo. Hakusivua, hakulomaketta ja päätösnäkymää ei ole vielä
-olemassa. Kaikki tiedot ovat keksittyjä.
+Suomeksi lyhyesti: asuntohaku- ja hakemusdemo suomalaiselle yleishyödylliselle
+asuntotoimijalle. Backend, sääntömoottori ja kaikki viisi näyttöä (haku, kohdesivu,
+hakemus, päätökset, asukasvalinta) on rakennettu. Kaikki tiedot ovat keksittyjä, eikä
+sovellusta ole vielä julkaistu — ks. [Live demo](#live-demo) ja
+[What is not built yet](#what-is-not-built-yet).
 
 A housing search and application demo for a Finnish non-profit housing operator that
 rents and sells apartments across four regulated housing forms. The hard part is not
 the listings — it is deciding who is eligible for which apartment, and being able to
 explain every decision to the applicant in Finnish.
 
-> **Work in progress.** This README describes only what is built and running today.
-> See [What is not built yet](#what-is-not-built-yet).
+## Live demo
+
+Not deployed yet. See [What is not built yet](#what-is-not-built-yet) for exactly
+what deploying it still needs.
 
 ## What is built today
 
@@ -30,10 +34,27 @@ explain every decision to the applicant in Finnish.
 - **API** — the endpoint surface for search, the application and its basket, the
   adaptive-field endpoint, decisions, viewings, offers and the ranked applicant
   view.
-- **CI** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml): ruff, mypy
-  strict, the catalogue drift check, the migration against an empty database, and
-  pytest with coverage, all against Postgres and Redis service containers and no
-  cloud credentials.
+- **Frontend** — `web/`, Next.js + TypeScript, all five screens from the spec:
+  - **Asuntohaku** (`/`) — search with URL-encoded filter state, a MapLibre GL JS
+    map linked to the result list by hover, and an English locale toggle.
+  - **Asunnon sivu** (`/asunnot/[id]`) — gallery including the floor plan, the
+    dense Finnish key-facts table, the named contact, and — for rentals,
+    "Lisää hakemukseen"; for sale units, "Varaa näyttöaika" and "Jätä tarjous"
+    instead. Also has the English locale.
+  - **Hakemus** (`/hakemus/[token]`) — the basket and the adaptive form: a
+    section only appears once a chosen apartment's rule requires it, and says
+    which apartment and rule did that. Finnish only, deliberately (see
+    `CLAUDE.md`).
+  - **Päätökset** (`/hakemus/[token]/paatokset`) — one row per apartment,
+    rendered exactly as the API returns it; a `puuttuvat_tiedot` row links back
+    to the exact Hakemus field.
+  - **Asukasvalinta** (`/admin/asunnot/[id]`) — ranked applicants and the basis
+    for the order, unauthenticated, per its own router's docstring.
+- **CI** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml): a `backend`
+  job (ruff, mypy strict, the catalogue drift check, the migration against an
+  empty database, pytest with coverage) and a `web` job (eslint, `tsc`, vitest,
+  `next build`), both against service containers where needed and no cloud
+  credentials.
 
 ### Seeing it work
 
@@ -71,13 +92,33 @@ yet, the answer is "we cannot decide", not "no".
 
 ## What is not built yet
 
-**The whole frontend.** There are no pages: no search, no apartment page, no
-application form, no decisions screen, no tenant-selection view. Nothing in this
-repository serves a web page today, and nothing is deployed. `vercel.json` is
-present but has never been used.
+**Nothing is deployed.** `vercel.json` is present but has never been run against
+it; there is no Neon Postgres, no Upstash Redis, and no live URL. Deploying it is
+three steps: `alembic upgrade head` and `python -m seeds.load` against a real
+Postgres instance, then `vercel deploy` for `web/` and `api/index.py`.
 
-The English locale for the listings is also unbuilt: `units.description_en` is
-empty on every row.
+**The frontend has not been exercised against a live backend.** This was built and
+verified in a sandbox with no Docker and therefore no local Postgres or Redis (the
+same constraint the backend's own test suite works around — see "Running the
+tests" below). Every screen passes `tsc`, `eslint` and `next build`, and the
+pure/presentational logic (URL filter round-tripping, the adaptive form's
+section-by-section behaviour, all three decision states, `formatEuros`/
+`formatArea`/`formatDate`) has unit and component tests — but nobody has clicked
+through a real search, added a real apartment to a real application, or watched a
+real decision render against a running API. CI's `web` job builds and tests the
+frontend in isolation; it does not run it against the `backend` job's database.
+
+**No Playwright run yet.** SPEC section 9 asks for one end-to-end pass — search,
+add two apartments of different housing forms, fill the form, read the decisions —
+against the built app with a Postgres service container. Not written.
+
+## What is live and what is not
+
+Everything above runs as real code against a real (if not-yet-provisioned)
+Postgres/Redis pair; nothing in this repository is a mock standing in for a
+missing feature. What genuinely doesn't exist yet is the deployment itself, and
+the one-time manual/Playwright pass that would confirm frontend and backend agree
+once they're both actually running.
 
 ## Running the tests
 
@@ -103,3 +144,15 @@ export DATABASE_URL=postgresql+psycopg://asuntohaku:asuntohaku@localhost:5432/as
 alembic upgrade head
 python -m seeds.load
 ```
+
+For the frontend:
+
+```bash
+cd web
+npm ci
+npm run lint && npm run typecheck && npm test && npm run build
+```
+
+`npm run dev` expects the API at `NEXT_PUBLIC_API_BASE_URL` (default
+`http://localhost:8000`), so run `uvicorn api.app.main:app --reload` against the
+database above alongside it to click through the app locally.
