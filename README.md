@@ -97,6 +97,18 @@ it; there is no Neon Postgres, no Upstash Redis, and no live URL. Deploying it i
 three steps: `alembic upgrade head` and `python -m seeds.load` against a real
 Postgres instance, then `vercel deploy` for `web/` and `api/index.py`.
 
+**Known risk, found empirically on a sibling project, not yet verified here:**
+Vercel's Python runtime is zero-config now — an explicit `"runtime": "python@..."`
+version string (removed from `vercel.json` above) is no longer valid. Separately,
+Vercel's `rewrites` behavior recently changed to forward the rewritten
+*destination* path to the function rather than the original request path, which
+can break a FastAPI app's internal routing when its own routes (like this one's,
+all under `/api/...`) depend on the original URL surviving the rewrite. This
+broke the otherwise-identical `vercel.json` pattern on the sibling `rag-eval-gate`
+project and had to be fixed by dropping the rewrite entirely. Verify `/api/...`
+actually routes correctly the first time this is deployed, and drop or adjust the
+rewrite if it doesn't.
+
 **The frontend has not been exercised against a live backend.** This was built and
 verified in a sandbox with no Docker and therefore no local Postgres or Redis (the
 same constraint the backend's own test suite works around — see "Running the
@@ -133,8 +145,9 @@ The rule engine tests need no database and run anywhere. The API contract tests
 need PostgreSQL and skip without it; set `TEST_DATABASE_URL` to run them.
 
 The migration has been applied to a real PostgreSQL 18 instance and the full
-suite — 233 tests, including the viewing-capacity trigger under two concurrency
-races — passes against it.
+suite — 250 tests (208 run, 42 skipped where they need infrastructure this
+sandbox doesn't have — see above), including the viewing-capacity trigger
+under two concurrency races — passes against it.
 
 To bring up the local database and Redis:
 
