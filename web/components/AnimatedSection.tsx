@@ -15,6 +15,10 @@ export function AnimatedSection({ open, children }: { open: boolean; children: R
       className="grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none"
       style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       aria-hidden={!open}
+      // Collapsed content stays in the DOM so it can animate shut, but must
+      // not be reachable by keyboard or a screen reader while it is — plain
+      // aria-hidden doesn't remove focusability on its own.
+      inert={!open || undefined}
     >
       <div className="overflow-hidden">{children}</div>
     </div>
