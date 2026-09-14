@@ -8,15 +8,29 @@ leaves the same rows. It does not touch applications.
 
 from __future__ import annotations
 
+import datetime as dt
 import os
 import sys
 
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import Session
 
-from api.app.models import Contact, Property, Unit, UnitImage
+from api.app.models import Contact, Property, Unit, UnitImage, Viewing
 from seeds.data import PROPERTIES
 from seeds.listings import PROPERTY_CONTACTS, PROPERTY_COORDINATES, UNIT_LISTINGS
+
+#: Fixed reference point rather than dt.datetime.now(): a seed run must be
+#: reproducible, and "viewings a week from whenever someone happened to run
+#: this" is not a fact worth being non-deterministic about.
+_SEED_TODAY = dt.date(2026, 9, 14)
+
+#: Two upcoming showing times per sale unit (spec section 7: "For sale units:
+#: Varaa näyttöaika and Jätä tarjous"). Capacities differ so the demo shows
+#: both a normal and a nearly-full slot; no bookings are seeded against them.
+_VIEWING_OFFSETS_AND_CAPACITY: tuple[tuple[int, int, int], ...] = (
+    (5, 17, 6),  # 5 days out, 17:00, room for six
+    (12, 10, 2),  # 12 days out, 10:00, a small slot
+)
 
 
 def load(session: Session) -> tuple[int, int]:
@@ -31,6 +45,7 @@ def load(session: Session) -> tuple[int, int]:
     session.flush()
 
     units = 0
+    sale_units: list[Unit] = []
     for seed in PROPERTIES:
         coordinates = PROPERTY_COORDINATES.get(seed.name)
         prop = Property(
@@ -92,9 +107,20 @@ def load(session: Session) -> tuple[int, int]:
                         sort_order=image.sort_order,
                     )
                 )
+            if unit_seed.listing_type == "myynti":
+                sale_units.append(unit)
             prop.units.append(unit)
             units += 1
         session.add(prop)
+
+    session.flush()  # obtain unit.id for the sale units' viewings below
+
+    for unit in sale_units:
+        for days_out, hour, capacity in _VIEWING_OFFSETS_AND_CAPACITY:
+            starts_at = dt.datetime.combine(
+                _SEED_TODAY + dt.timedelta(days=days_out), dt.time(hour=hour, tzinfo=dt.UTC)
+            )
+            session.add(Viewing(unit_id=unit.id, starts_at=starts_at, capacity=capacity))
 
     session.flush()
     return len(PROPERTIES), units
