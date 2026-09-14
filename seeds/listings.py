@@ -42,6 +42,7 @@ class UnitListing:
     room_layout_fi: str
     dwelling_type: str  # "kerrostalo" | "rivitalo" | "omakotitalo" | "luhtitalo"
     description_fi: str
+    description_en: str
     has_lift: bool
     has_sauna: bool
     has_balcony: bool
@@ -333,6 +334,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "yksin tai pariskuntana asuvalle, joka arvostaa keskeistä sijaintia ilman "
             "auton tarvetta."
         ),
+        description_en=(
+            "The studio is on the third floor of a block completed in 2018 on "
+            "Porthaninkatu. The open kitchen opens straight onto the living room, and the "
+            "balcony faces the quiet inner courtyard, away from street noise. The "
+            "building has a lift and a residents' sauna that can be booked for private "
+            "use. Kallio's shops and cafes, and Hakaniemi metro station, are a few "
+            "minutes' walk away. Well suited to someone living alone or as a couple who "
+            "values a central location without needing a car."
+        ),
         has_lift=True,
         has_sauna=True,
         has_balcony=True,
@@ -352,6 +362,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "joten työmatkat Helsingin keskustaan tai Itäkeskukseen sujuvat ilman "
             "vaihtoja. Sopii erinomaisesti työssäkäyvälle parille tai etätyötä "
             "tekevälle, joka kaipaa oman nurkan kotiin."
+        ),
+        description_en=(
+            "A two-room flat on the fourth floor, where a sliding door separates the "
+            "bedroom from the living room -- a flexible arrangement for both working and "
+            "sleeping. Windows face two directions, so daylight lasts from morning to "
+            "evening. The kitchen has a dishwasher and good space for meals. The metro "
+            "station is a six-minute walk away, so commutes into central Helsinki or "
+            "Itäkeskos need no changes. Ideal for a working couple or a remote worker who "
+            "wants a place of their own."
         ),
         has_lift=True,
         has_sauna=False,
@@ -373,6 +392,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "ovat lähellä, mutta oma terassi tarjoaa rauhallisen hetken kotipihalla. "
             "Talossa on lisäksi hissi, joka palvelee muita kerroksia."
         ),
+        description_en=(
+            "A ground-floor two-room flat whose own terrace opens straight onto the yard, "
+            "so entry does not require the stairwell -- a real advantage with a pram or a "
+            "wheelchair. It also suits a dog owner, who can step straight out for a short "
+            "walk. The kitchen is open to the living room, with room for both dining and "
+            "lounging. Kallio's busy streets and parks are close by, while the private "
+            "terrace offers a quiet moment at home. The building also has a lift serving "
+            "the other floors."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=False,
@@ -391,6 +419,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "pois keittiön tieltä. Erillinen keittiö rauhoittaa ruoanlaiton omaksi "
             "tilakseen olohuoneesta. Talon hissi kulkee kaikkiin kerroksiin, joten "
             "ylimmän kerroksen sijainti ei tuo arkeen lisävaivaa."
+        ),
+        description_en=(
+            "A three-room flat on the building's top, fifth floor, with a view from the "
+            "living-room windows all the way to Kallio church. The bathroom was renovated "
+            "in 2023, so its surfaces and fittings are fresh. There is also a separate "
+            "utility room with space for a washer and a drying rack, out of the kitchen's "
+            "way. A separate kitchen keeps cooking in its own space, away from the living "
+            "room. The building's lift reaches every floor, so the top-floor location "
+            "adds no extra effort."
         ),
         has_lift=True,
         has_sauna=False,
@@ -412,6 +449,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "palveluihin. Talossa on hissi ja asukassauna, joita moni tässä koossa "
             "asuva ruokakunta pitää arjen etuna."
         ),
+        description_en=(
+            "A three-room flat on the fourth floor, where both bedrooms face the "
+            "courtyard, so city noise does not reach the sleeping areas. The kitchen has "
+            "room for a table seating six, making it a natural gathering point for a "
+            "family or shared household. The living room is separate and faces the "
+            "street. Porthaninkatu is a short walk from the services of both Kallio and "
+            "Hakaniemi. The building has a lift and a residents' sauna, both valued by "
+            "many households of this size."
+        ),
         has_lift=True,
         has_sauna=True,
         has_balcony=False,
@@ -430,6 +476,14 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "näkyy suoraan kuukausikuluissa. Sijainti Porthaninkadulla tarkoittaa "
             "lyhyttä matkaa Kallion palveluihin ja hyviä liikenneyhteyksiä ympäri "
             "kaupunkia."
+        ),
+        description_en=(
+            "A two-room flat for sale on the sixth, top floor. The glazed balcony faces "
+            "southwest, so the afternoon sun warms it well into the evening. The kitchen "
+            "has stone worktops and a modern look suited to both everyday use and "
+            "entertaining. The housing company carries no loan, which shows directly in "
+            "the monthly costs. The Porthaninkatu address means a short trip to Kallio's "
+            "services and good transport links across the city."
         ),
         has_lift=True,
         has_sauna=False,
@@ -452,6 +506,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "kaupunginosa tarjoaa kävelymatkan päässä sekä ruokakaupat että "
             "ravintolat."
         ),
+        description_en=(
+            "A three-room flat for sale whose through-apartment layout brings light in "
+            "from morning to evening -- one balcony catches the morning sun, the other "
+            "the afternoon. The housing company commissioned a condition survey in spring "
+            "2026, so the buyer gets an up-to-date picture of the building's state. The "
+            "kitchen and living room are spacious, and the bedrooms sit on the quiet "
+            "side. A lift and a residents' sauna are among the building's amenities. "
+            "Kallio offers grocery shops and restaurants within walking distance."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=True,
@@ -472,6 +535,14 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Sijoittajalle tai ensiasunnon ostajalle kohde tarjoaa keskeisen "
             "sijainnin Kalliossa kohtuullisella neliöhinnalla."
         ),
+        description_en=(
+            "A studio for sale on the building's top floor. The balcony faces east, so "
+            "the morning sun wakes the flat naturally. The layout is efficient with no "
+            "wasted space, so thirty-four square metres go a surprisingly long way for "
+            "both living and working from home. The building has a lift, so the top floor "
+            "is no burden in daily life. For an investor or a first-time buyer, this "
+            "offers a central Kallio location at a reasonable price per square metre."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=True,
@@ -491,6 +562,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "keittiö ovat kadun puolella. Talon hissi ja asukassauna täydentävät "
             "kokonaisuutta. Porthaninkadun sijainti tuo lähelle sekä Kallion "
             "palvelut että hyvät kulkuyhteydet keskustaan."
+        ),
+        description_en=(
+            "A four-room flat for sale on the second floor, suited to a larger household. "
+            "It has its own sauna and two bathrooms, so a busy morning is no problem for "
+            "a household with several adults. All bedrooms face the quiet inner "
+            "courtyard, while the living room and kitchen face the street. A lift and "
+            "residents' sauna round out the building's amenities. The Porthaninkatu "
+            "address brings both Kallio's services and good transport links into the city "
+            "centre close by."
         ),
         has_lift=True,
         has_sauna=True,
@@ -514,6 +594,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Sturenkadulta on lyhyt matka sekä ratikkapysäkeille että Vallilan "
             "siirtolapuutarhaan kävelylenkille."
         ),
+        description_en=(
+            "A studio on the first floor with windows facing the quiet inner courtyard. "
+            "The building has a residents' lounge for shared events and an affordable "
+            "laundry room that eases everyday washing. The open kitchen is compact but "
+            "functional, with room for both a bed and a desk. The 1974 building is old "
+            "Vallila at its best: brick facades and generous ceiling heights. Sturenkatu "
+            "is a short walk from tram stops and a walk through the Vallila allotment "
+            "gardens."
+        ),
         has_lift=False,
         has_sauna=False,
         has_balcony=False,
@@ -533,6 +622,16 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "mahtuu hyvin parisänky. Talossa on tarveharkintainen vuokra, joka "
             "näkyy suoraan kohtuullisena kuukausivuokrana. Sturenkadun varrelta "
             "pääsee ratikalla nopeasti sekä keskustaan että Pasilaan."
+        ),
+        description_en=(
+            "A two-room flat on the third floor, where the original parquet floor has "
+            "survived the decades in good condition, giving the flat warmth and "
+            "character. The balcony looks out over the colourful huts and gardens of the "
+            "Vallila allotment gardens, making morning coffee a small occasion in itself. "
+            "The open kitchen connects to the living room, and the bedroom comfortably "
+            "fits a double bed. The needs-assessed rent shows directly in a reasonable "
+            "monthly cost. Sturenkatu gives a quick tram ride to both the city centre and "
+            "Pasila."
         ),
         has_lift=False,
         has_sauna=False,
@@ -555,6 +654,16 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "rauhallinen kerrostaloalue on suosittu juuri lapsiperheiden "
             "keskuudessa."
         ),
+        description_en=(
+            "A three-room flat that suits a family with two children well: both bedrooms "
+            "are their own quiet retreat, and a spacious hall leaves room for prams and "
+            "outdoor clothing. The kitchen is separate from the living room, so the "
+            "bustle of cooking doesn't disturb the rest of the home. A school and a "
+            "daycare are within the same block, cutting the morning school run to "
+            "minutes. Sitting on the second floor, the flat is also easy to reach without "
+            "a lift. Vallila's quiet apartment-block district is popular precisely with "
+            "families."
+        ),
         has_lift=False,
         has_sauna=False,
         has_balcony=False,
@@ -574,6 +683,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "ja olohuone toimii luontevana yhteisenä tilana. Neljännestä "
             "kerroksesta on hyvät näkymät Vallilan kattojen ylle, ja Sturenkadun "
             "ratikkapysäkille on lyhyt kävelymatka."
+        ),
+        description_en=(
+            "A four-room flat suited to a large household or a shared home for several "
+            "people. The kitchen was renovated in 2021, so the appliances and surfaces "
+            "are modern within an older building's frame. Two separate toilets ease the "
+            "morning rush when several people are leaving at once. The rooms are "
+            "generously spread out, and the living room works naturally as shared space. "
+            "The fourth floor offers good views over Vallila's rooftops, and it's a short "
+            "walk to the Sturenkatu tram stop."
         ),
         has_lift=False,
         has_sauna=False,
@@ -595,6 +713,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "lyhyttä matkaa ulko-ovelle ilman portaita. Sturenkadun varsi tarjoaa "
             "lähipalvelut kävelymatkan päässä."
         ),
+        description_en=(
+            "A two-room flat on the first floor, designed to be accessible: the entrance "
+            "has no steps and the doorways are wide, so it also suits someone using a "
+            "mobility aid. The bathroom fits both a washing machine and a drying rack, "
+            "saving space elsewhere in the flat. The open kitchen connects to the living "
+            "room, and the windows let in plenty of light. The ground-floor location also "
+            "means a short trip to the front door with no stairs. Sturenkatu offers local "
+            "services within walking distance."
+        ),
         has_lift=False,
         has_sauna=False,
         has_balcony=False,
@@ -615,6 +742,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "tyypillistä vahvarakenteista Vallilan kerrostaloa. Sturenkadulta "
             "pääsee ratikalla ja bussilla nopeasti sekä keskustaan että Pasilan "
             "asemalle."
+        ),
+        description_en=(
+            "A three-room flat on the building's top, fifth floor is spacious and bright: "
+            "the living room gives good room for both lounging and dining. The bedrooms "
+            "face the quiet side onto the yard, so street noise doesn't disturb the "
+            "night's sleep. The building has a rooftop sauna residents can book for "
+            "shared use -- a handy benefit since the flat itself has none. The 1974 "
+            "building is a typically solidly built Vallila apartment block. Sturenkatu "
+            "gives quick tram and bus links to both the city centre and Pasila station."
         ),
         has_lift=False,
         has_sauna=False,
@@ -638,6 +774,16 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "metroasemalle ja palveluihin on lyhyt matka, mikä tekee arjesta "
             "sujuvaa ilman omaa autoakin."
         ),
+        description_en=(
+            "A two-room townhouse flat with its own yard suits a couple or someone living "
+            "alone who wants a down-to-earth way of living without an apartment block's "
+            "shared spaces. Underfloor heating and an air-source heat pump keep the "
+            "temperature even year round while also saving on heating costs. A carport "
+            "space is included in the rent, so there's no need to brush snow off the car "
+            "in winter. The building was completed in 2021, so surfaces and systems are "
+            "still completely fresh. Matinkylä metro station and its services are a short "
+            "trip away, making daily life easy even without a car."
+        ),
         has_lift=False,
         has_sauna=False,
         has_balcony=False,
@@ -659,6 +805,16 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "on hyvät kulkuyhteydet sekä Matinkylän metroasemalle että "
             "Länsiväylälle."
         ),
+        description_en=(
+            "Three rooms are spread over two floors: two bedrooms of their own upstairs, "
+            "and a spacious living room downstairs leading straight out to a terrace. The "
+            "layout suits a family well, where children and adults alike want space of "
+            "their own under one roof. The terrace looks out over the row houses' shared "
+            "yard, and evenings can be spent outside without the neighbours' gaze. The "
+            "building was built in 2021, so materials and insulation meet today's "
+            "standards. Matinkatu has good connections to both Matinkylä metro station "
+            "and the Länsiväylä motorway."
+        ),
         has_lift=False,
         has_sauna=False,
         has_balcony=False,
@@ -678,6 +834,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "makuuhuoneille. Rakennusvuosi 2021 näkyy energiatehokkaassa "
             "lämmityksessä ja tiiviissä rakenteissa. Matinkylän palvelut ja koulut "
             "ovat kävelymatkan päässä."
+        ),
+        description_en=(
+            "The end unit has windows facing three directions, so light fills the flat "
+            "throughout the day. A fenced play area on the yard side makes the flat "
+            "especially suited to a family with young children -- they can play safely "
+            "within sight of the windows. Three rooms give space for both a shared living "
+            "room and bedrooms of one's own. The 2021 build year shows in "
+            "energy-efficient heating and tight construction. Matinkylä's services and "
+            "schools are within walking distance."
         ),
         has_lift=False,
         has_sauna=False,
@@ -699,6 +864,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Talo sopii erinomaisesti isommalle perheelle, joka arvostaa "
             "rivitaloasumisen tilavuutta ja omaa pihaa."
         ),
+        description_en=(
+            "The family flat offers four rooms, a separate utility room and its own sauna "
+            "-- an unusually complete package for a rental. The utility room keeps "
+            "laundry and outdoor gear organised, separate from the rest of the home. The "
+            "sauna allows unwinding in private, without a housing company's booking list. "
+            "Matinkylä metro station is about a ten-minute walk away, so the commute into "
+            "the centre needs no car. Well suited to a larger family that values a row "
+            "house's space and its own yard."
+        ),
         has_lift=False,
         has_sauna=True,
         has_balcony=False,
@@ -718,6 +892,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Rivitalo valmistui 2021, joten tekniikka ja pinnat ovat uudet. "
             "Matinkadun sijainti tarjoaa rauhallisen asuinympäristön, mutta silti "
             "lyhyen matkan Matinkylän palveluihin."
+        ),
+        description_en=(
+            "A two-room flat whose kitchen comes with a dishwasher and an induction hob "
+            "-- everyday cooking goes smoothly with no fuss. The flat also has its own "
+            "storage unit, room enough for bicycles and seasonal gear kept out of the "
+            "living space. The terrace faces south, so it catches the sun for most of the "
+            "day. The row house was completed in 2021, so the systems and surfaces are "
+            "new. Matinkatu offers a quiet living environment while still being a short "
+            "trip from Matinkylä's services."
         ),
         has_lift=False,
         has_sauna=False,
@@ -740,6 +923,16 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "kävelyreittejä. Asumisoikeusjärjestelmä sopii hyvin sille, joka "
             "haluaa vakautta ilman omistusasunnon koko taloudellista sitoumusta."
         ),
+        description_en=(
+            "A right-of-occupancy two-room flat with its own sauna -- an unusual benefit "
+            "at this size. The glazed balcony extends the outdoor season from spring well "
+            "into autumn while also sheltering from the wind. The service charge includes "
+            "water and the building's broadband, keeping monthly costs predictable. The "
+            "building was completed in 2009 and sits in the Kirstinharju area, rich in "
+            "greenery and quiet walking routes. The right-of-occupancy system suits "
+            "someone who wants stability without a home purchase's full financial "
+            "commitment."
+        ),
         has_lift=True,
         has_sauna=True,
         has_balcony=True,
@@ -759,6 +952,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "2009 valmistunutta asumisoikeuskohdetta, jossa huoltokulut on "
             "suunniteltu pitkäjänteisesti. Espoon keskuksen palvelut ja "
             "juna-asema ovat kohtuullisen matkan päässä."
+        ),
+        description_en=(
+            "In this three-room flat, the kitchen and living room form one unified, "
+            "spacious area that works well both day to day and for guests. Both bedrooms "
+            "sit on the quiet side, away from the bustle of the building's main entrance. "
+            "The fourth floor gives a view out over the surrounding rooftops. The "
+            "building is part of a right-of-occupancy development completed in 2009, with "
+            "maintenance costs planned for the long term. Espoo centre's services and "
+            "train station are a reasonable distance away."
         ),
         has_lift=True,
         has_sauna=False,
@@ -781,6 +983,16 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "alue tarjoaa rauhallisen ympäristön lähellä Espoon keskuksen "
             "palveluita."
         ),
+        description_en=(
+            "A two-room flat on the first floor, with direct access via a terrace to its "
+            "own piece of the yard. The entrance is step-free, and the building's lift "
+            "conveniently reaches the basement storage units, even though the flat itself "
+            "sits at ground level. The open kitchen connects to the living room, with "
+            "room enough for both a sofa and a dining table. The arrangement suits "
+            "someone needing mobility support, or a family for whom moving around with a "
+            "pram is part of daily life. The Suvela area offers a quiet setting close to "
+            "Espoo centre's services."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=False,
@@ -802,6 +1014,16 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "suosittu perheiden keskuudessa juuri väljyytensä ja vehreytensä "
             "vuoksi."
         ),
+        description_en=(
+            "A four-room right-of-occupancy flat offers space for a larger household: two "
+            "bathrooms, one of them with a sauna, ease the mornings when several people "
+            "are getting ready to leave at once. The rooms are spread out generously and "
+            "the living room is a good size. The housing company's yard has a shared "
+            "grill shelter that invites neighbours to summer evenings together. The "
+            "building, completed in 2009, has stayed in good condition thanks to regular "
+            "maintenance. The Kirstinharju area is popular with families precisely for "
+            "its spaciousness and greenery."
+        ),
         has_lift=True,
         has_sauna=True,
         has_balcony=False,
@@ -821,6 +1043,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "omaan käyttötarkoitukseensa. Talo on osa 2009 rakennettua "
             "asumisoikeuskohdetta Kirstinharjussa. Espoon keskuksen "
             "juna-asemalle ja palveluihin pääsee kohtuullisessa ajassa."
+        ),
+        description_en=(
+            "The top-floor three-room flat looks out towards the nearby forest, giving "
+            "the home a calm feel in the middle of Espoo. One of the bedrooms is smaller "
+            "and works excellently as a home office or child's room -- a flexibility many "
+            "remote workers appreciate. The kitchen and living room are separate, keeping "
+            "both spaces to their own purpose. The building is part of a "
+            "right-of-occupancy development built in Kirstinharju in 2009. Espoo centre's "
+            "train station and services are a reasonable trip away."
         ),
         has_lift=True,
         has_sauna=False,
@@ -843,6 +1074,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "historian hyvin. Sijainti sopii erinomaisesti työmatkalaiselle, joka "
             "arvostaa nopeita julkisen liikenteen yhteyksiä."
         ),
+        description_en=(
+            "The studio sits right next to the train station, so the airport is reachable "
+            "on the ring rail with no change, and central Helsinki just minutes away. The "
+            "building has a lift and a supervised bicycle cellar, adding security for "
+            "bike storage. The open kitchen is compact but functional for one person. The "
+            "1988 building is typical of the Tikkurila station-area apartment block, and "
+            "the maintenance company knows the building's history well. A location well "
+            "suited to a commuter who values fast public-transport links."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=False,
@@ -863,6 +1103,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "vuosien varrella hyvässä huollossa. Sopii hyvin pariskunnalle tai "
             "yksin asuvalle, joka arvostaa säilytystilaa ja hyviä "
             "liikenneyhteyksiä."
+        ),
+        description_en=(
+            "A two-room flat on the fifth floor whose balcony faces west -- the evening "
+            "sun warms it well into the summer night. The kitchen has room for a dining "
+            "table, and the flat also has a large walk-in wardrobe, easing the storage "
+            "shortage common in many flats this size. The building is within walking "
+            "distance of Tikkurila station and its services. The building has been well "
+            "maintained and refurbished over the years. Well suited to a couple or "
+            "someone living alone who values storage space and good transport links."
         ),
         has_lift=True,
         has_sauna=False,
@@ -885,6 +1134,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Kehärata ja lähijunat vievät nopeasti sekä Helsinkiin että "
             "lentokentälle."
         ),
+        description_en=(
+            "The three-room flat's layout works well for a small family: the living room "
+            "and kitchen are spacious, and both bedrooms give parents and children space "
+            "of their own. A daycare, a library and a swimming hall are all within "
+            "walking distance, making the daily schedule manageable without a car. The "
+            "ground-floor location means a short trip to the front door. The building was "
+            "built in 1988 and sits right by the Tikkurila station-area services. The "
+            "ring rail and local trains reach both Helsinki and the airport quickly."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=False,
@@ -905,6 +1163,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "kouluista ja päiväkodeista. Alue on tunnettu hyvistä palveluistaan "
             "ja toimivista liikenneyhteyksistään."
         ),
+        description_en=(
+            "A four-room flat suits a household with several children: three separate "
+            "bedrooms give everyone their own corner, and a separate kitchen keeps "
+            "cooking in its own space. The living room serves as the family's shared "
+            "gathering place in the evenings. The third floor gives good views over "
+            "Tikkurila's rooftops. The building was built in 1988 and sits within walking "
+            "distance of the station, schools and daycares. The area is known for its "
+            "good services and functional transport links."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=False,
@@ -923,6 +1190,14 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "tilaa riittää sekä oleskelulle että ruokailulle. Toinen kerros on "
             "helppo kulkea myös ilman hissiä. Tikkurilan asema ja palvelut ovat "
             "lyhyen kävelymatkan päässä."
+        ),
+        description_en=(
+            "A two-room flat on the courtyard side is unusually quiet, since street noise "
+            "doesn't reach the windows. The bathroom was renewed in 2020, and the whole "
+            "building has had its pipes renovated, so the building's systems are up to "
+            "date. The open kitchen connects to the living room, with room enough for "
+            "both relaxing and dining. The second floor is also easy to reach without a "
+            "lift. Tikkurila station and its services are a short walk away."
         ),
         has_lift=True,
         has_sauna=False,
@@ -943,6 +1218,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Rakennus vuodelta 1988 on osa vilkasta mutta viihtyisää Tikkurilan "
             "asemanseutua. Juna-asemalle ja kehäradalle on vain muutaman "
             "minuutin kävelymatka."
+        ),
+        description_en=(
+            "A three-room flat on the building's top, sixth floor gives a view from the "
+            "living room out over the railway all the way to the Tikkurilanjoki river. "
+            "The building has a shared roof terrace with an even wider view -- a handy "
+            "extra when the flat's own balcony isn't enough. The bedrooms face the quiet "
+            "side onto the yard. The 1988 building is part of the busy but pleasant "
+            "Tikkurila station area. The train station and the ring rail are just a few "
+            "minutes' walk away."
         ),
         has_lift=True,
         has_sauna=False,
@@ -965,6 +1249,16 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "rakenteet ja tekniikka ovat vielä tuoreet. Sijainti sopii hyvin "
             "työssäkäyvälle, joka arvostaa lyhyttä etäisyyttä juna-asemalle."
         ),
+        description_en=(
+            "The two-room flat sits right on the edge of Myyrmäki square, surrounded by a "
+            "shop, a pharmacy and the train station -- daily errands are done on foot "
+            "with no separate car trips. The glazed balcony extends the outdoor season "
+            "and shelters from the weather year round. The open kitchen connects to the "
+            "living room, giving an airy impression despite the compact size. The "
+            "building was completed in 2015, so its structures and systems are still "
+            "fresh. A location well suited to someone working who values being close to "
+            "the train station."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=True,
@@ -984,6 +1278,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "avarat, ja makuuhuoneet sijaitsevat rauhallisella puolella. "
             "Myyrmäen torin palvelut ja juna-asema ovat lyhyen kävelymatkan "
             "päässä."
+        ),
+        description_en=(
+            "The three-room flat on the sixth floor gives a view all the way to the "
+            "Vantaanjoki river -- the evening sun setting over the river shows best from "
+            "exactly this floor. The flat has its own sauna, an unusual benefit for a "
+            "rental of this size. The glazed balcony extends the living space outdoors in "
+            "any weather. The kitchen and living room are spacious, and the bedrooms sit "
+            "on the quiet side. Myyrmäki square's services and the train station are a "
+            "short walk away."
         ),
         has_lift=True,
         has_sauna=True,
@@ -1005,6 +1308,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "juna-asemasta. Sopii hyvin opiskelijalle tai yksin asuvalle, joka "
             "arvostaa keskeistä sijaintia edulliseen hintaan."
         ),
+        description_en=(
+            "A studio on the first floor, where a large window brings in plenty of "
+            "natural light. The kitchenette is designed to be efficient: everything "
+            "needed fits into a small space without feeling cramped. A private storage "
+            "unit by the entrance offers extra room for, say, a bicycle or seasonal gear. "
+            "The building was built in 2015 and sits within walking distance of Myyrmäki "
+            "square and the train station. Well suited to a student or someone living "
+            "alone who values a central location at an affordable price."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=False,
@@ -1024,6 +1336,14 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Rakennus vuodelta 2015 sijaitsee aivan Myyrmäen torin kupeessa. "
             "Juna-asemalle ja torin palveluihin on vain muutaman minuutin "
             "kävelymatka."
+        ),
+        description_en=(
+            "A two-room flat whose bedroom comfortably fits a double bed and a desk for "
+            "remote work. The building has its own gym and two sauna sections that "
+            "residents can book -- a pleasant extra without a separate gym membership. "
+            "The open kitchen connects to the living room, with room for dining too. The "
+            "2015 building sits right by Myyrmäki square. The train station and the "
+            "square's services are just a few minutes' walk away."
         ),
         has_lift=True,
         has_sauna=False,
@@ -1045,6 +1365,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "mikä tekee kohteesta toimivan sekä omistusasunnoksi että "
             "sijoitukseksi."
         ),
+        description_en=(
+            "A two-room flat for sale on the building's top, seventh floor. The glazed "
+            "balcony faces southwest, so afternoons and evenings on the balcony are sunny "
+            "for much of the year. The living room is spacious and connects naturally to "
+            "the kitchen. The lift reaches the flat's own door, so the top floor means no "
+            "stair-climbing. Myyrmäki square's services and the train station are within "
+            "walking distance, making this a practical choice both as a home and as an "
+            "investment."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=True,
@@ -1065,6 +1394,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "rauhallisella puolella taloa. Myyrmäen torin sijainti tarjoaa "
             "hyvät palvelut ja junayhteydet niin Helsinkiin kuin Tikkurilaankin."
         ),
+        description_en=(
+            "A three-room flat for sale with its own sauna and two balconies -- one for "
+            "the morning sun, the other for afternoon light. The housing company's loan "
+            "share can be paid off in full at the time of purchase, easing future "
+            "maintenance charges. The kitchen and living room form one unified, spacious "
+            "whole. The bedrooms sit on the quiet side of the building. Myyrmäki square's "
+            "location offers good services and train connections to both Helsinki and "
+            "Tikkurila."
+        ),
         has_lift=True,
         has_sauna=True,
         has_balcony=True,
@@ -1083,6 +1421,14 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Avokeittiö ja olohuone muodostavat yhtenäisen, valoisan tilan. Talo "
             "on rakennettu 2015, joten kunnossapitokulut ovat vielä maltilliset. "
             "Myyrmäen juna-asemalle ja torin palveluihin on lyhyt kävelymatka."
+        ),
+        description_en=(
+            "A studio for sale suits both a first-time buyer and an investor. Rental "
+            "demand in the area is strong, particularly among students, making the flat "
+            "an attractive rental prospect too. The open kitchen and living room form one "
+            "bright, unified space. The building was built in 2015, so maintenance costs "
+            "are still modest. Myyrmäki's train station and the square's services are a "
+            "short walk away."
         ),
         has_lift=True,
         has_sauna=False,
@@ -1104,6 +1450,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "perheen yhteisenä tilana. Neljäs kerros tarjoaa hyvät näkymät "
             "Myyrmäen ylle. Torin palvelut ja juna-asema ovat kävelymatkan "
             "päässä."
+        ),
+        description_en=(
+            "A four-room flat for sale offers space for a larger family: its own sauna "
+            "and a glazed balcony make everyday life pleasant both indoors and out. The "
+            "building's facade was renovated in 2024, so the building's exterior is fresh "
+            "and maintenance-free for years to come. The rooms are spread out generously, "
+            "and the living room works as the family's shared space. The fourth floor "
+            "gives good views out over Myyrmäki. The square's services and the train "
+            "station are within walking distance."
         ),
         has_lift=True,
         has_sauna=True,
@@ -1127,6 +1482,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "pariskunnalle tai yksin asuvalle, joka arvostaa asumisoikeuden "
             "tuomaa vakautta."
         ),
+        description_en=(
+            "A right-of-occupancy two-room flat with its own yard area and a separate "
+            "storage unit for belongings. Kaleva church and swimming hall are a short "
+            "walk away, making active evenings easy without long trips. The open kitchen "
+            "connects naturally to the living room. The building was completed in 2012 "
+            "and sits on Sammonkatu, along which the tramline also runs. Well suited to a "
+            "couple or someone living alone who values the stability right-of-occupancy "
+            "housing brings."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=False,
@@ -1145,6 +1509,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "puistoiselle katukuvalle. Rakennus on osa 2012 valmistunutta "
             "asumisoikeuskohdetta Kalevassa. Ratikkalinja kulkee talon editse, "
             "joten keskustaan pääsee nopeasti ilman omaa autoa."
+        ),
+        description_en=(
+            "The three-room flat has its own sauna and a glazed balcony -- a combination "
+            "that adds value to everyday life year round. The kitchen has a dishwasher "
+            "and a separate dining area, giving mealtimes their own calm space. The third "
+            "floor looks out over Sammonkatu's leafy streetscape. The building is part of "
+            "a right-of-occupancy development completed in 2012 in Kaleva. The tramline "
+            "runs right past the building, so the city centre is reachable quickly "
+            "without a car."
         ),
         has_lift=True,
         has_sauna=True,
@@ -1165,6 +1538,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "suoraan keskustaan. Sopii hyvin opiskelijalle tai yksin asuvalle, "
             "joka arvostaa asumisoikeuden joustavuutta."
         ),
+        description_en=(
+            "A studio whose windows look out onto a park -- a green view that brings calm "
+            "even in the middle of the city. The service charge includes both water and "
+            "the housing company's broadband, so monthly costs are easy to predict. The "
+            "open kitchen is compact but functional. The building sits on Sammonkatu, "
+            "along which Tampere's tramline runs straight to the centre. Well suited to a "
+            "student or someone living alone who values the flexibility of "
+            "right-of-occupancy housing."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=False,
@@ -1183,6 +1565,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Ratikkapysäkki sijaitsee aivan talon edessä, joten matka Tampereen "
             "keskustaan tai Hervantaan sujuu ilman vaihtoja. Rakennus on "
             "valmistunut 2012 ja osa arvostettua asumisoikeuskohdetta Kalevassa."
+        ),
+        description_en=(
+            "A four-room flat offers plenty of space: two bathrooms ease mornings in a "
+            "larger household, and a big hallway leaves room for outdoor clothes and "
+            "shoes. The rooms are spread generously throughout the flat, and the living "
+            "room is the family's natural gathering place. A tram stop sits right outside "
+            "the building, so the trip to central Tampere or to Hervanta needs no "
+            "changes. The building was completed in 2012 as part of a well-regarded "
+            "right-of-occupancy development in Kaleva."
         ),
         has_lift=True,
         has_sauna=False,
@@ -1204,6 +1595,14 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "Talo on valmistunut 2019, joten rakenteet ja tekniikka ovat vielä "
             "täysin tuoreet."
         ),
+        description_en=(
+            "The studio is within walking distance of the university campus, making it a "
+            "popular choice for students. The kitchen comes ready furnished, so moving in "
+            "needs no big purchases. A private balcony offers a breath of outdoor air "
+            "even on the busiest study days. The tram reaches the city centre in about "
+            "twenty minutes. The building was completed in 2019, so its structures and "
+            "systems are still completely fresh."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=True,
@@ -1222,6 +1621,14 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "muodostavat yhtenäisen, valoisan kokonaisuuden. Rakennus on "
             "valmistunut 2019 ja sijaitsee lähellä kampusta ja kauppakeskusta. "
             "Sopii hyvin pariskunnalle tai kimppakämpän asukkaille."
+        ),
+        description_en=(
+            "The two-room flat has an open kitchen and an unusually large bedroom that "
+            "easily fits a double bed plus a desk. The building has a shared car "
+            "residents can book, reducing the need to own one while living in Hervanta. "
+            "The living room and kitchen form one unified, bright whole. The building was "
+            "completed in 2019 and sits close to the campus and a shopping centre. Well "
+            "suited to a couple or to flatmates sharing a home."
         ),
         has_lift=True,
         has_sauna=False,
@@ -1242,6 +1649,14 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "keskustaan tekee kohteesta toimivan myös opiskelun jälkeiseen "
             "elämänvaiheeseen."
         ),
+        description_en=(
+            "In the three-room flat, both bedrooms sit on the quiet side of the building, "
+            "away from the noise of the campus and the street. The kitchen opens onto a "
+            "glazed balcony that serves as an outdoor space in any weather. The living "
+            "room is spacious and bright. The building was built in 2019 and sits close "
+            "to Hervanta's centre. The tram link to the centre also makes the flat "
+            "practical for life after studies."
+        ),
         has_lift=True,
         has_sauna=False,
         has_balcony=True,
@@ -1260,6 +1675,14 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "olohuoneeseen. Talo on valmistunut 2019 ja sijaitsee Hervannan "
             "ydinalueella lähellä kampusta ja palveluita. Sopii hyvin sekä "
             "opiskelijalle että työssäkäyvälle yksin asuvalle."
+        ),
+        description_en=(
+            "The two-room flat has good storage throughout, and the bathroom has a "
+            "washing-machine connection, easing everyday life without a separate laundry "
+            "room. A shopping centre sits in the next block, so daily errands are done on "
+            "foot. The open kitchen connects to the living room. The building was "
+            "completed in 2019 and sits in the heart of Hervanta, close to the campus and "
+            "services. Well suited to both a student and a working person living alone."
         ),
         has_lift=True,
         has_sauna=False,
@@ -1280,6 +1703,15 @@ UNIT_LISTINGS: dict[tuple[str, str], UnitListing] = {
             "yhteisenä tilana iltaisin. Rakennus on valmistunut 2019 ja "
             "sijaitsee Hervannan keskustan lähellä. Alue tarjoaa runsaasti "
             "palveluita ja hyvät ratikkayhteydet Tampereen keskustaan."
+        ),
+        description_en=(
+            "The four-room family flat offers three separate bedrooms, its own sauna and "
+            "a utility room -- an unusually complete package at this price point. The "
+            "school is across the street, so the school run is short and safe for a "
+            "child. The living room and kitchen are spacious and work as the family's "
+            "shared space in the evenings. The building was completed in 2019 and sits "
+            "close to Hervanta's centre. The area offers plentiful services and good tram "
+            "links to central Tampere."
         ),
         has_lift=True,
         has_sauna=True,

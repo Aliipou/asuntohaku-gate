@@ -72,6 +72,7 @@ def load(session: Session) -> tuple[int, int]:
                 # The richer description from seeds/listings.py replaces the
                 # one-line placeholder that data.py carries.
                 description_fi=listing.description_fi,
+                description_en=listing.description_en,
                 maintenance_fee_eur=listing.maintenance_fee_eur,
                 room_layout_fi=listing.room_layout_fi,
                 dwelling_type=listing.dwelling_type,

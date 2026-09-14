@@ -7,9 +7,10 @@ apartment, rent or price here corresponds to anything that exists.
 Descriptions are written per apartment rather than generated, because a listing
 page full of repeated sentences is exactly what makes a demo look like a demo.
 
-``description_en`` is deliberately absent: SPEC section 7 makes English a
-secondary locale for the search and detail pages only, and section 12 allows it
-to be cut. The column stays nullable and empty until that locale is built.
+``description_en`` lives in ``seeds/listings.py`` alongside the rest of the
+per-unit listing content (SPEC section 7 makes English a secondary locale for
+the search and detail pages only), joined onto these records the same way as
+the Finnish description, photos and facts.
 """
 
 from __future__ import annotations
