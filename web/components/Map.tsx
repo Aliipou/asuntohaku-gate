@@ -66,8 +66,22 @@ export function Map({ points, activeId = null, onHoverPoint, onSelectPoint, clas
       map.scrollZoom.disable();
     }
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+    // Style/tile fetch failures otherwise fail silently: no error surfaces,
+    // "load" never fires, and the map just sits blank with nothing in the
+    // console to explain why.
+    map.on("error", (e) => {
+      console.error("[Map] maplibre error:", e.error?.message ?? e);
+    });
+    // The container isn't always at its final size the instant this effect
+    // runs (it can still be widening/settling from surrounding layout), and a
+    // map created against a stale size can end up not painting until told to
+    // re-measure. A ResizeObserver keeps it in sync for the container's whole
+    // lifetime, not just once at mount.
+    const resizeObserver = new ResizeObserver(() => map.resize());
+    resizeObserver.observe(containerRef.current);
     mapRef.current = map;
     return () => {
+      resizeObserver.disconnect();
       map.remove();
       mapRef.current = null;
     };
@@ -123,9 +137,16 @@ export function Map({ points, activeId = null, onHoverPoint, onSelectPoint, clas
 
     if (map.isStyleLoaded()) {
       render();
-    } else {
-      map.once("load", render);
+      return;
     }
+    map.once("load", render);
+    // Markers are positioned from the map's center/zoom transform, not from
+    // the basemap tiles themselves — they don't need to wait on "load" at
+    // all. A slow or stuck style/tile fetch shouldn't leave the pins missing
+    // too, so place them on a short timer regardless; render() is safe to
+    // call twice (it keys everything off point id).
+    const fallback = window.setTimeout(render, 1200);
+    return () => window.clearTimeout(fallback);
   }, [points]);
 
   // Reflect the hovered/focused result row on the matching pin.
