@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ApiError, bookViewing, type ViewingOut } from "@/lib/api";
 import { ensureApplicationToken } from "@/lib/browserState";
 import { formatDate } from "@/lib/format";
-import type { tekstit } from "@/lib/tekstit";
+import { pickTekstit, type Locale } from "@/lib/locale";
 
 function formatTime(iso: string): string {
   const date = new Date(iso);
@@ -12,7 +12,8 @@ function formatTime(iso: string): string {
 }
 
 /** Screen 2's "Varaa näyttöaika" (spec section 7, sale units). */
-export function ViewingBooker({ viewings, t }: { viewings: ViewingOut[]; t: typeof tekstit }) {
+export function ViewingBooker({ viewings, locale }: { viewings: ViewingOut[]; locale: Locale }) {
+  const t = pickTekstit(locale);
   const [selected, setSelected] = useState<number | null>(viewings[0]?.id ?? null);
   const [state, setState] = useState<"idle" | "pending" | "booked" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);

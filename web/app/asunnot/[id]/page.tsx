@@ -76,12 +76,12 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
         <Link href={`/${langSuffix}`} className="text-sm text-ink-muted hover:underline">
           ← {t.takaisinHakuun}
         </Link>
-        <LocaleToggle locale={locale} t={t} />
+        <LocaleToggle locale={locale} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="flex flex-col gap-6">
-          <Gallery images={unit.images} t={t} />
+          <Gallery images={unit.images} locale={locale} />
 
           <div>
             <h1 className="text-2xl font-semibold text-ink">
@@ -181,15 +181,15 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
             <div className="flex flex-col gap-5">
               <div>
                 <h2 className="mb-2 font-medium text-ink">{t.varaaNayttoaika}</h2>
-                <ViewingBooker viewings={viewings} t={t} />
+                <ViewingBooker viewings={viewings} locale={locale} />
               </div>
               <div>
                 <h2 className="mb-2 font-medium text-ink">{t.jataTarjous}</h2>
-                <OfferForm unitId={unit.id} t={t} />
+                <OfferForm unitId={unit.id} locale={locale} />
               </div>
             </div>
           ) : (
-            <AddToApplicationButton unitId={unit.id} langSuffix={langSuffix} t={t} />
+            <AddToApplicationButton unitId={unit.id} langSuffix={langSuffix} locale={locale} />
           )}
         </aside>
       </div>

@@ -6,8 +6,7 @@ import type { UnitOut } from "@/lib/api";
 import { getFavourites } from "@/lib/api";
 import { getSessionKey } from "@/lib/browserState";
 import { formatEuros } from "@/lib/format";
-import type { tekstit } from "@/lib/tekstit";
-import type { Locale } from "@/lib/locale";
+import { pickTekstit, type Locale } from "@/lib/locale";
 import { UnitRow } from "./UnitRow";
 import { Map, type MapPoint } from "./Map";
 
@@ -19,12 +18,11 @@ import { Map, type MapPoint } from "./Map";
 export function SearchResults({
   units,
   locale,
-  t,
 }: {
   units: UnitOut[];
   locale: Locale;
-  t: typeof tekstit;
 }) {
+  const t = pickTekstit(locale);
   const router = useRouter();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [favouriteIds, setFavouriteIds] = useState<Set<number>>(new Set());

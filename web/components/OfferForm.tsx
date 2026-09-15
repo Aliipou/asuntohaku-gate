@@ -2,10 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { ApiError, createOffer } from "@/lib/api";
-import type { tekstit } from "@/lib/tekstit";
+import { pickTekstit, type Locale } from "@/lib/locale";
 
 /** Screen 2's "Jätä tarjous" (spec section 7, sale units) — no application needed. */
-export function OfferForm({ unitId, t }: { unitId: number; t: typeof tekstit }) {
+export function OfferForm({ unitId, locale }: { unitId: number; locale: Locale }) {
+  const t = pickTekstit(locale);
   const [state, setState] = useState<"idle" | "pending" | "sent" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
 

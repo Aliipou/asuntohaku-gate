@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { addApplicationUnit, ApiError } from "@/lib/api";
 import { ensureApplicationToken } from "@/lib/browserState";
-import type { tekstit } from "@/lib/tekstit";
+import { pickTekstit, type Locale } from "@/lib/locale";
 
 /**
  * Screen 2's primary action for rental stock (spec section 7). Starts an
@@ -17,12 +17,13 @@ import type { tekstit } from "@/lib/tekstit";
 export function AddToApplicationButton({
   unitId,
   langSuffix,
-  t,
+  locale,
 }: {
   unitId: number;
   langSuffix: string;
-  t: typeof tekstit;
+  locale: Locale;
 }) {
+  const t = pickTekstit(locale);
   const [state, setState] = useState<"idle" | "pending" | "added" | "error">("idle");
   const [token, setToken] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

@@ -50,17 +50,17 @@ export default async function Page({ searchParams }: SearchPageProps) {
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 py-6 sm:px-6">
       <div className="flex items-center justify-between gap-3">
         <h1 className="sr-only">{t.sivunOtsikko}</h1>
-        <LocaleToggle locale={locale} t={t} />
+        <LocaleToggle locale={locale} />
       </div>
 
-      <SearchControls filters={filters} cities={cities} total={loadError ? null : total} locale={locale} t={t} />
+      <SearchControls filters={filters} cities={cities} total={loadError ? null : total} locale={locale} />
 
       {loadError ? (
         <p role="alert" className="rounded-md border border-line bg-paper-raised p-4 text-ink">
           {t.hakuEpaonnistui}
         </p>
       ) : (
-        <SearchResults units={units} locale={locale} t={t} />
+        <SearchResults units={units} locale={locale} />
       )}
     </main>
   );

@@ -3,8 +3,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import type { SearchFilters } from "@/lib/filters";
-import type { tekstit } from "@/lib/tekstit";
-import { pickAsumismuotoLabels, pickAvailabilityLabels, type Locale } from "@/lib/locale";
+import { pickAsumismuotoLabels, pickAvailabilityLabels, pickTekstit, type Locale } from "@/lib/locale";
 import type { Availability, CityOut, HousingForm, ListingType } from "@/lib/api";
 
 /** Auto-submits the enclosing <form> so every control change re-encodes the URL. */
@@ -19,15 +18,14 @@ export function SearchControls({
   cities,
   total,
   locale,
-  t,
 }: {
   filters: SearchFilters;
   cities: CityOut[];
   /** null when the search request failed — the count is then not shown. */
   total: number | null;
   locale: Locale;
-  t: typeof tekstit;
 }) {
+  const t = pickTekstit(locale);
   const [tallennettu, setTallennettu] = useState(false);
   const advancedOpen = Boolean(filters.housingForm || filters.availability);
   const priceLabel = filters.listingType === "myynti" ? t.hintaMyyntiLabel : t.hintaVuokraLabel;

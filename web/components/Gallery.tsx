@@ -3,13 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import type { UnitImageOut } from "@/lib/api";
-import type { tekstit } from "@/lib/tekstit";
+import { pickTekstit, type Locale } from "@/lib/locale";
 
 /**
  * Screen 2's image gallery (spec section 7): includes the floor plan
  * (`pohjapiirros`) as one of the image types, not a separate feature.
  */
-export function Gallery({ images, t }: { images: UnitImageOut[]; t: typeof tekstit }) {
+export function Gallery({ images, locale }: { images: UnitImageOut[]; locale: Locale }) {
+  const t = pickTekstit(locale);
   const [index, setIndex] = useState(0);
   if (images.length === 0) return null;
   const current = images[index];

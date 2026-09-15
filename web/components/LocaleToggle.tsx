@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { withLocale, type Locale } from "@/lib/locale";
-import type { tekstit } from "@/lib/tekstit";
+import { pickTekstit, withLocale, type Locale } from "@/lib/locale";
 
 /**
  * Switches `?lang=` on the current URL, keeping every other query parameter
@@ -11,7 +10,8 @@ import type { tekstit } from "@/lib/tekstit";
  * Only rendered on the search and detail pages — the two with a secondary
  * locale (spec section 7).
  */
-export function LocaleToggle({ locale, t }: { locale: Locale; t: typeof tekstit }) {
+export function LocaleToggle({ locale }: { locale: Locale }) {
+  const t = pickTekstit(locale);
   const searchParams = useSearchParams();
   const target: Locale = locale === "en" ? "fi" : "en";
   const href = `?${withLocale(new URLSearchParams(searchParams), target).toString()}`;
