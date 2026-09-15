@@ -20,6 +20,27 @@ Deployed on Vercel as two projects (frontend and API, cross-origin — see
 synthetic units described below), no Redis yet. See
 [What is not built yet](#what-is-not-built-yet) for what that leaves out.
 
+**The whole pipeline has been driven live, end to end, against the real
+deployment** — not just search. Verified by hand against the production API:
+create an application → add a rental unit to the basket → read back
+`required-fields` (the adaptive form's own contract) → submit household income
+and housing situation → read `decisions` and get a real, evidence-backed
+eligibility outcome with the deciding rule and the actual numbers compared
+(e.g. "Ruokakunnan bruttotulot 2 200 € kuukaudessa ovat enintään tulorajan
+3 400 € suuruiset") → and for a `tarveharkintainen` unit, the admin ranking
+endpoint correctly orders applicants by housing need, then wealth, then
+income, again with full evidence. This is real code answering real requests
+against a real database, not a fixture.
+
+**A real bug this surfaced and fixed:** the initial `seeds.load` run against
+Neon corrupted every Finnish/Swedish character (ä, ö, å) into mojibake —
+`Insinöörinkatu` came back as `Insin\xffrinkatu`-style garbage. Root cause:
+this sandbox's Windows Python subprocess wasn't forcing UTF-8 I/O
+(`PYTHONUTF8`/`PYTHONIOENCODING`), so the seed strings got mangled on the way
+into Postgres despite `client_encoding` correctly reporting `UTF8`. Reseeded
+with those forced, verified fixed by reading real Finnish street names back
+through the live API.
+
 ## What is built today
 
 - **Schema and migration** — ten tables, with the constraints that carry meaning
@@ -122,19 +143,22 @@ now, exactly as this section used to say. Fixed by having each of those
 components take the plain `locale` string and call `pickTekstit(locale)`
 itself, instead of receiving the already-computed object.
 
-**Still only lightly clicked through.** Search and the unit detail page have
-been hit live and render real seeded data end to end. Hakemus (the
-adaptive-field application form), päätökset (decisions) and the admin
-asukasvalinta screen have not — they don't pass `t` across a Server/Client
-boundary the same way (Finnish-only, no locale toggle), so they're less
-likely to hit the same class of bug, but nobody has driven a real application
-through them against the live API yet.
+**The API side of the full flow is now verified live** (see above) — create
+application, add unit, required-fields, submit household data, decisions, and
+admin ranking all confirmed against production with real evidence-backed
+output. **The three screens that front those calls (hakemus, päätökset,
+asukasvalinta) have not themselves been clicked through in a browser yet** —
+only their API contract has, directly. They don't pass `t` across a
+Server/Client boundary the way the search/detail pages did, so they're
+unlikely to hit that specific bug class, but a real user driving the actual
+form UI against the live API is still unverified.
 
 **No Playwright run yet.** SPEC section 9 asks for one end-to-end pass —
 search, add two apartments of different housing forms, fill the form, read
-the decisions. Not written. Now that there's a live deploy, this no longer
-needs a Postgres service container to run against — it could run against
-the live URLs above.
+the decisions. Not written, though the manual API walkthrough above covers
+the same ground minus the browser. Now that there's a live deploy, this no
+longer needs a Postgres service container to run against — it could run
+against the live URLs above.
 
 ## What is live and what is not
 
