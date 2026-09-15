@@ -97,17 +97,18 @@ it; there is no Neon Postgres, no Upstash Redis, and no live URL. Deploying it i
 three steps: `alembic upgrade head` and `python -m seeds.load` against a real
 Postgres instance, then `vercel deploy` for `web/` and `api/index.py`.
 
-**Known risk, found empirically on a sibling project, not yet verified here:**
-Vercel's Python runtime is zero-config now — an explicit `"runtime": "python@..."`
-version string (removed from `vercel.json` above) is no longer valid. Separately,
-Vercel's `rewrites` behavior recently changed to forward the rewritten
-*destination* path to the function rather than the original request path, which
-can break a FastAPI app's internal routing when its own routes (like this one's,
-all under `/api/...`) depend on the original URL surviving the rewrite. This
-broke the otherwise-identical `vercel.json` pattern on the sibling `rag-eval-gate`
-project and had to be fixed by dropping the rewrite entirely. Verify `/api/...`
-actually routes correctly the first time this is deployed, and drop or adjust the
-rewrite if it doesn't.
+**Known risk, found empirically on a sibling project, applied here but not yet
+verified by an actual deploy:** Vercel's Python runtime is zero-config now — an
+explicit `"runtime": "python@..."` version string is no longer valid, and is not
+in `vercel.json`. Separately, Vercel's `rewrites` behavior recently changed to
+forward the rewritten *destination* path to the function rather than the
+original request path, which breaks a FastAPI app's internal routing when its
+own routes (like this one's, all under `/api/...` via each router's own
+`prefix=`) depend on the original URL surviving the rewrite. This broke the
+otherwise-identical `vercel.json` pattern on the sibling `rag-eval-gate` project
+(now live) and was fixed there by dropping the `rewrites` block entirely —
+`vercel.json` here has no `rewrites` for the same reason. Still verify `/api/...`
+actually routes correctly the first time this is deployed.
 
 **The frontend has not been exercised against a live backend.** This was built and
 verified in a sandbox with no Docker and therefore no local Postgres or Redis (the
