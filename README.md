@@ -2,9 +2,8 @@
 
 Suomeksi lyhyesti: asuntohaku- ja hakemusdemo suomalaiselle yleishyödylliselle
 asuntotoimijalle. Backend, sääntömoottori ja kaikki viisi näyttöä (haku, kohdesivu,
-hakemus, päätökset, asukasvalinta) on rakennettu. Kaikki tiedot ovat keksittyjä, eikä
-sovellusta ole vielä julkaistu — ks. [Live demo](#live-demo) ja
-[What is not built yet](#what-is-not-built-yet).
+hakemus, päätökset, asukasvalinta) on rakennettu ja julkaistu. Kaikki tiedot ovat
+keksittyjä — ks. [Live demo](#live-demo) ja [What is not built yet](#what-is-not-built-yet).
 
 A housing search and application demo for a Finnish non-profit housing operator that
 rents and sells apartments across four regulated housing forms. The hard part is not
@@ -13,8 +12,13 @@ explain every decision to the applicant in Finnish.
 
 ## Live demo
 
-Not deployed yet. See [What is not built yet](#what-is-not-built-yet) for exactly
-what deploying it still needs.
+- **Search + listings:** https://asuntohaku-gate-web.vercel.app
+- **API:** https://asuntohaku-gate.vercel.app (`/api/health`, `/api/units`, ...)
+
+Deployed on Vercel as two projects (frontend and API, cross-origin — see
+`api/app/main.py`'s CORS config), a free Neon Postgres (seeded with the same 48
+synthetic units described below), no Redis yet. See
+[What is not built yet](#what-is-not-built-yet) for what that leaves out.
 
 ## What is built today
 
@@ -92,48 +96,54 @@ yet, the answer is "we cannot decide", not "no".
 
 ## What is not built yet
 
-**Not deployed yet, in progress.** The Vercel project (`aliipous-projects/asuntohaku-gate`)
-is linked. Provisioning a free Neon Postgres through Vercel's marketplace is blocked on a
-one-time terms-of-service acceptance that has to happen in a logged-in browser — the CLI
-can't do it non-interactively. Once that's accepted: Neon Postgres, then a free Upstash
-Redis, then `alembic upgrade head` and `python -m seeds.load` against the real database,
-then `vercel deploy` for `web/` and `api/index.py`. No live URL yet.
+**No Redis.** Upstash's free-tier marketplace integration needs the same
+one-time terms-of-service click Neon did, and that one hasn't happened yet.
+The app runs correctly without it — `api/app/cache.py` degrades to "cache
+always misses, throttle never triggers" and `/api/health` reports
+`"cache": "disabled"`, which is what the live deploy actually shows right
+now.
 
-**Known risk, found empirically on a sibling project, applied here but not yet
-verified by an actual deploy:** Vercel's Python runtime is zero-config now — an
-explicit `"runtime": "python@..."` version string is no longer valid, and is not
-in `vercel.json`. Separately, Vercel's `rewrites` behavior recently changed to
-forward the rewritten *destination* path to the function rather than the
-original request path, which breaks a FastAPI app's internal routing when its
-own routes (like this one's, all under `/api/...` via each router's own
-`prefix=`) depend on the original URL surviving the rewrite. This broke the
-otherwise-identical `vercel.json` pattern on the sibling `rag-eval-gate` project
-(now live) and was fixed there by dropping the `rewrites` block entirely —
-`vercel.json` here has no `rewrites` for the same reason. Still verify `/api/...`
-actually routes correctly the first time this is deployed.
+**The Vercel routing/runtime risk this section used to warn about is now
+verified, not just applied.** Dropping the `rewrites` block (the sibling
+`rag-eval-gate` fix) and pinning no explicit Python runtime string both work:
+`/api/...` routes correctly on the live deploy.
 
-**The frontend has not been exercised against a live backend.** This was built and
-verified in a sandbox with no Docker and therefore no local Postgres or Redis (the
-same constraint the backend's own test suite works around — see "Running the
-tests" below). Every screen passes `tsc`, `eslint` and `next build`, and the
-pure/presentational logic (URL filter round-tripping, the adaptive form's
-section-by-section behaviour, all three decision states, `formatEuros`/
-`formatArea`/`formatDate`) has unit and component tests — but nobody has clicked
-through a real search, added a real apartment to a real application, or watched a
-real decision render against a running API. CI's `web` job builds and tests the
-frontend in isolation; it does not run it against the `backend` job's database.
+**A real bug this surfaced, now fixed:** the live deploy first 500'd on every
+page. Both `app/page.tsx` and `app/asunnot/[id]/page.tsx` are Server
+Components that were passing the whole `tekstit` translations object —
+several of its fields are functions, e.g. `tulosMaara(n)`, `kuvaNumero(n,
+total)` — as a prop straight into Client Components. Next.js can't serialize
+a function across that boundary, so it threw at render time on every route
+that used `SearchControls`, `SearchResults`, `LocaleToggle`, `Gallery`,
+`ViewingBooker`, `OfferForm` or `AddToApplicationButton`. `tsc`, `eslint` and
+`next build` all passed anyway — it's a runtime React error, not a type
+error, and this genuinely was never exercised against a live deploy until
+now, exactly as this section used to say. Fixed by having each of those
+components take the plain `locale` string and call `pickTekstit(locale)`
+itself, instead of receiving the already-computed object.
 
-**No Playwright run yet.** SPEC section 9 asks for one end-to-end pass — search,
-add two apartments of different housing forms, fill the form, read the decisions —
-against the built app with a Postgres service container. Not written.
+**Still only lightly clicked through.** Search and the unit detail page have
+been hit live and render real seeded data end to end. Hakemus (the
+adaptive-field application form), päätökset (decisions) and the admin
+asukasvalinta screen have not — they don't pass `t` across a Server/Client
+boundary the same way (Finnish-only, no locale toggle), so they're less
+likely to hit the same class of bug, but nobody has driven a real application
+through them against the live API yet.
+
+**No Playwright run yet.** SPEC section 9 asks for one end-to-end pass —
+search, add two apartments of different housing forms, fill the form, read
+the decisions. Not written. Now that there's a live deploy, this no longer
+needs a Postgres service container to run against — it could run against
+the live URLs above.
 
 ## What is live and what is not
 
-Everything above runs as real code against a real (if not-yet-provisioned)
-Postgres/Redis pair; nothing in this repository is a mock standing in for a
-missing feature. What genuinely doesn't exist yet is the deployment itself, and
-the one-time manual/Playwright pass that would confirm frontend and backend agree
-once they're both actually running.
+Everything above runs as real code against a real, provisioned Postgres — Redis
+is the one piece still pending (see above). Nothing in this repository is a
+mock standing in for a missing feature. What's live: search, the unit detail
+page, and the API behind both. What's not: Redis, and the Playwright pass that
+would confirm the rest of the flow (application, decisions, admin ranking)
+end to end.
 
 ## Running the tests
 
