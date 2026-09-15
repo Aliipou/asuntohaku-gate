@@ -26,6 +26,13 @@ def database_url() -> str:
             "DATABASE_URL is not set. Locally: docker compose up -d, then "
             "DATABASE_URL=postgresql+psycopg://asuntohaku:asuntohaku@localhost:5432/asuntohaku"
         )
+    # Managed providers (Neon via the Vercel integration included) hand out a
+    # plain postgres(ql):// URL; SQLAlchemy then reaches for psycopg2, which
+    # isn't installed (this project pins psycopg 3). Force the psycopg3 driver.
+    if url.startswith("postgres://"):
+        url = "postgresql+psycopg://" + url[len("postgres://"):]
+    elif url.startswith("postgresql://"):
+        url = "postgresql+psycopg://" + url[len("postgresql://"):]
     return url
 
 
