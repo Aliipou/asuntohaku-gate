@@ -92,10 +92,12 @@ yet, the answer is "we cannot decide", not "no".
 
 ## What is not built yet
 
-**Nothing is deployed.** `vercel.json` is present but has never been run against
-it; there is no Neon Postgres, no Upstash Redis, and no live URL. Deploying it is
-three steps: `alembic upgrade head` and `python -m seeds.load` against a real
-Postgres instance, then `vercel deploy` for `web/` and `api/index.py`.
+**Not deployed yet, in progress.** The Vercel project (`aliipous-projects/asuntohaku-gate`)
+is linked. Provisioning a free Neon Postgres through Vercel's marketplace is blocked on a
+one-time terms-of-service acceptance that has to happen in a logged-in browser — the CLI
+can't do it non-interactively. Once that's accepted: Neon Postgres, then a free Upstash
+Redis, then `alembic upgrade head` and `python -m seeds.load` against the real database,
+then `vercel deploy` for `web/` and `api/index.py`. No live URL yet.
 
 **Known risk, found empirically on a sibling project, applied here but not yet
 verified by an actual deploy:** Vercel's Python runtime is zero-config now — an
